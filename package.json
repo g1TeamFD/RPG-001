@@ -1,0 +1,10 @@
+{
+  "name": "project",
+  "version": "1.0.0",
+  "description": "RPG Game - The Last Night at Ember & Spoon",
+  "type": "module",
+  "main": "game-v2-exact-design.html",
+  "scripts": {
+    "build": "echo 'No build required for static HTML project'"
+  }
+}
