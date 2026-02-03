@@ -38,6 +38,10 @@ let sessionData = {
   finalScores: {},
 };
 
+// Story Comments (Session-scoped, in-memory)
+let storyComments = [];
+let currentExpandedChapter = null;
+
 // Initialize
 window.onload = function () {
   console.log('✅ Game loaded!');
@@ -52,6 +56,9 @@ window.showStoryline = showStoryline;
 window.showRoles = showRoles;
 window.showHint = showHint;
 window.closeModal = closeModal;
+window.closeStoryModal = closeStoryModal;
+window.toggleChapter = toggleChapter;
+window.sendComment = sendComment;
 window.editBlank = editBlank;
 window.saveBlank = saveBlank;
 
@@ -428,11 +435,132 @@ function scrollToBottom() {
 }
 
 function showStoryline() {
-  document.getElementById('modal-title').textContent = 'The Story';
-  document.getElementById(
-    'modal-body'
-  ).innerHTML = `<p class="modal-text">The rain falls softly as Ember & Spoon serves its final dinner service...</p>`;
-  document.getElementById('modal').classList.remove('hidden');
+  try {
+    const storyData = window.STORY_DATA;
+
+    if (!storyData || storyData.length === 0) {
+      console.error('No story data found');
+      return;
+    }
+
+    const businessUID = storyData[0]['Business UID'] || 'Story';
+    const chapterMap = {};
+
+    storyData.forEach(item => {
+      const chapterName = item.Chapter;
+      if (!chapterMap[chapterName]) {
+        chapterMap[chapterName] = [];
+      }
+      chapterMap[chapterName].push(item);
+    });
+
+    document.getElementById('story-modal-title').textContent = businessUID;
+
+    const storyContentArea = document.getElementById('story-content-area');
+    storyContentArea.innerHTML = '';
+
+    Object.keys(chapterMap).forEach((chapterName, index) => {
+      const chapterDiv = document.createElement('div');
+      chapterDiv.className = 'story-chapter';
+
+      const chapterHeader = document.createElement('div');
+      chapterHeader.className = 'story-chapter-header';
+      chapterHeader.onclick = () => toggleChapter(index);
+      chapterHeader.innerHTML = `
+        <span class="chapter-arrow" id="chapter-arrow-${index}">▶</span>
+        <span class="chapter-title">${chapterName}</span>
+      `;
+
+      const chapterBody = document.createElement('div');
+      chapterBody.className = 'story-chapter-body hidden';
+      chapterBody.id = `chapter-body-${index}`;
+
+      const items = chapterMap[chapterName];
+      items.forEach(item => {
+        if (item.Header && item.Header.trim()) {
+          const headerEl = document.createElement('div');
+          headerEl.className = 'story-item-header';
+          headerEl.textContent = item.Header;
+          chapterBody.appendChild(headerEl);
+        }
+
+        if (item.Text && item.Text.trim()) {
+          const textEl = document.createElement('div');
+          textEl.className = 'story-item-text';
+          textEl.textContent = item.Text;
+          chapterBody.appendChild(textEl);
+        }
+      });
+
+      chapterDiv.appendChild(chapterHeader);
+      chapterDiv.appendChild(chapterBody);
+      storyContentArea.appendChild(chapterDiv);
+    });
+
+    renderComments();
+
+    document.getElementById('story-modal').classList.remove('hidden');
+  } catch (error) {
+    console.error('Error loading story:', error);
+  }
+}
+
+function toggleChapter(index) {
+  const chapterBody = document.getElementById(`chapter-body-${index}`);
+  const arrow = document.getElementById(`chapter-arrow-${index}`);
+
+  if (currentExpandedChapter !== null && currentExpandedChapter !== index) {
+    const prevBody = document.getElementById(`chapter-body-${currentExpandedChapter}`);
+    const prevArrow = document.getElementById(`chapter-arrow-${currentExpandedChapter}`);
+    if (prevBody) prevBody.classList.add('hidden');
+    if (prevArrow) prevArrow.textContent = '▶';
+  }
+
+  if (chapterBody.classList.contains('hidden')) {
+    chapterBody.classList.remove('hidden');
+    arrow.textContent = '▼';
+    currentExpandedChapter = index;
+  } else {
+    chapterBody.classList.add('hidden');
+    arrow.textContent = '▶';
+    currentExpandedChapter = null;
+  }
+}
+
+function sendComment() {
+  const input = document.getElementById('comment-input');
+  const commentText = input.value.trim();
+
+  if (commentText === '') return;
+
+  storyComments.push({
+    text: commentText,
+    timestamp: new Date().toLocaleTimeString()
+  });
+
+  input.value = '';
+  renderComments();
+}
+
+function renderComments() {
+  const commentsDisplay = document.getElementById('comments-display');
+  commentsDisplay.innerHTML = '';
+
+  storyComments.forEach(comment => {
+    const commentDiv = document.createElement('div');
+    commentDiv.className = 'comment-item';
+    commentDiv.innerHTML = `
+      <div class="comment-time">${comment.timestamp}</div>
+      <div class="comment-text">${comment.text}</div>
+    `;
+    commentsDisplay.appendChild(commentDiv);
+  });
+
+  commentsDisplay.scrollTop = commentsDisplay.scrollHeight;
+}
+
+function closeStoryModal() {
+  document.getElementById('story-modal').classList.add('hidden');
 }
 
 function showRoles() {

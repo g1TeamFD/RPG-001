@@ -1,0 +1,1153 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>RPG #001 - The Last Night at Ember & Spoon</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: 'Segoe UI', 'Inter', 'Arial', sans-serif;
+        background: #f5f1e8;
+        overflow: hidden;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 100vh;
+        width: 100vw;
+      }
+
+      /* Mobile warning */
+      .mobile-warning {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(44, 62, 60, 0.95);
+        z-index: 9999;
+        justify-content: center;
+        align-items: center;
+        padding: 40px;
+      }
+
+      .mobile-warning-content {
+        background: #f5f1e8;
+        padding: 40px;
+        border-radius: 20px;
+        text-align: center;
+        max-width: 400px;
+      }
+
+      .mobile-warning-content h2 {
+        color: #2c3e3c;
+        margin-bottom: 20px;
+        font-size: 24px;
+      }
+
+      .mobile-warning-content p {
+        color: #6b7c78;
+        line-height: 1.6;
+        font-size: 16px;
+      }
+
+      /* Show warning on mobile or very small screens */
+      @media (max-width: 768px), (max-height: 600px) {
+        .mobile-warning {
+          display: flex !important;
+        }
+        .container {
+          display: none !important;
+        }
+      }
+
+      /* Main container - fixed 16:9 ratio, centered & auto-scaled */
+      .container {
+        aspect-ratio: 16 / 9;
+        width: min(100vw, 177.78vh);
+        height: min(56.25vw, 100vh);
+        display: grid;
+        grid-template-columns: 18% 52% 30%;
+        gap: 0;
+        max-width: 100%;
+        max-height: 100%;
+      }
+
+      /* LEFT SIDEBAR */
+      .sidebar-left {
+        background: #8ba89c;
+        padding: 20px 15px;
+        display: flex;
+        flex-direction: column;
+        position: relative;
+        overflow: hidden;
+      }
+
+      .game-title {
+        background: #f5f1e8;
+        padding: 10px 15px;
+        border-radius: 10px;
+        text-align: center;
+        margin-bottom: 15px;
+        font-weight: 700;
+        font-size: 16px;
+        color: #2c3e3c;
+        letter-spacing: 0.5px;
+      }
+
+      .story-header {
+        font-size: 16px;
+        font-weight: 700;
+        color: #2c3e3c;
+        margin-bottom: 15px;
+        line-height: 1.2;
+        text-align: center;
+      }
+
+      .story-image {
+        width: 100%;
+        aspect-ratio: 1;
+        background: #2c3e3c;
+        border-radius: 10px;
+        margin-bottom: 15px;
+        overflow: hidden;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .story-image img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+      }
+
+      .info-section {
+        margin-bottom: 12px;
+      }
+
+      .info-label {
+        font-size: 11px;
+        font-weight: 700;
+        color: #2c3e3c;
+        margin-bottom: 4px;
+        text-transform: uppercase;
+        letter-spacing: 0.3px;
+      }
+
+      .info-value {
+        font-size: 13px;
+        color: #f5f1e8;
+        line-height: 1.4;
+      }
+
+      .bottom-actions {
+        position: absolute;
+        bottom: 15px;
+        left: 15px;
+        right: 15px;
+        display: flex;
+        justify-content: space-around;
+        gap: 5px;
+      }
+
+      .action-icon {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 4px;
+        cursor: pointer;
+        transition: transform 0.2s;
+      }
+
+      .action-icon:hover {
+        transform: translateY(-2px);
+      }
+
+      .icon-circle {
+        width: 45px;
+        height: 45px;
+        background: #2c3e3c;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 20px;
+      }
+
+      .icon-label {
+        font-size: 9px;
+        color: #2c3e3c;
+        font-weight: 600;
+        text-align: center;
+        line-height: 1.1;
+      }
+
+      /* CENTER CONTENT */
+      .main-content {
+        background: #b8d4cc;
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+        overflow: hidden;
+      }
+
+      .conversation-header {
+        background: #2c3e3c;
+        color: #f5f1e8;
+        padding: 15px 30px;
+        text-align: center;
+        font-size: 22px;
+        font-weight: 700;
+        letter-spacing: 1px;
+        flex-shrink: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 20px;
+        position: relative;
+      }
+
+      .nav-arrow {
+        width: 35px;
+        height: 35px;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        font-size: 18px;
+        transition: background 0.3s;
+      }
+
+      .nav-arrow:hover {
+        background: rgba(255, 255, 255, 0.2);
+      }
+
+      .top-actions {
+        display: flex;
+        justify-content: center;
+        gap: 12px;
+        padding: 12px 0;
+        flex-shrink: 0;
+      }
+
+      .icon-btn {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 4px;
+        cursor: pointer;
+        transition: transform 0.2s;
+      }
+
+      .icon-btn:hover {
+        transform: translateY(-2px);
+      }
+
+      .icon-btn-circle {
+        width: 50px;
+        height: 50px;
+        background: white;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 22px;
+        border: 2px solid #2c3e3c;
+      }
+
+      .icon-btn-label {
+        font-size: 10px;
+        color: #2c3e3c;
+        font-weight: 700;
+      }
+
+      /* Scrollable conversation area */
+      .conversation-scroll-area {
+        flex: 1;
+        overflow-y: auto;
+        overflow-x: hidden;
+        padding: 15px;
+      }
+
+      .conversation-scroll-area::-webkit-scrollbar {
+        width: 6px;
+      }
+
+      .conversation-scroll-area::-webkit-scrollbar-track {
+        background: rgba(255, 255, 255, 0.2);
+        border-radius: 10px;
+      }
+
+      .conversation-scroll-area::-webkit-scrollbar-thumb {
+        background: rgba(44, 62, 60, 0.3);
+        border-radius: 10px;
+      }
+
+      /* Response input area */
+      .response-input-area {
+        flex-shrink: 0;
+        padding: 12px 20px;
+        background: transparent;
+      }
+
+      .narrative-box {
+        background: rgba(255, 248, 231, 0.9);
+        padding: 15px 20px;
+        border-radius: 12px;
+        margin-bottom: 15px;
+        line-height: 1.6;
+        color: #2c3e3c;
+        font-size: 14px;
+        font-style: italic;
+        border-left: 3px solid rgba(212, 165, 116, 0.6);
+        animation: fadeInUp 0.4s ease;
+      }
+
+      @keyframes fadeInUp {
+        from {
+          opacity: 0;
+          transform: translateY(10px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      .typing-text {
+        overflow: hidden;
+        white-space: nowrap;
+        display: inline-block;
+      }
+
+      .dialogue-turn {
+        margin-bottom: 15px;
+        animation: fadeInUp 0.4s ease;
+        display: flex;
+        flex-direction: column;
+      }
+
+      .dialogue-turn.kenji {
+        align-items: flex-start;
+      }
+      .dialogue-turn.mira {
+        align-items: flex-end;
+      }
+
+      .speaker-info {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 6px;
+      }
+
+      .dialogue-turn.mira .speaker-info {
+        flex-direction: row-reverse;
+      }
+
+      .speaker-avatar {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: #2c3e3c;
+        border: 2px solid white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 20px;
+      }
+
+      .speaker-name {
+        font-size: 13px;
+        font-weight: 700;
+        color: #2c3e3c;
+      }
+
+      .speaker-role {
+        font-size: 11px;
+        color: #6b7c78;
+      }
+
+      .dialogue-bubble {
+        background: rgba(255, 255, 255, 0.85);
+        padding: 12px 16px;
+        border-radius: 12px;
+        max-width: 90%;
+        backdrop-filter: blur(10px);
+      }
+
+      .dialogue-turn.mira .dialogue-bubble {
+        background: rgba(232, 245, 243, 0.85);
+      }
+
+      .dialogue-text {
+        font-size: 14px;
+        line-height: 1.6;
+        color: #2c3e3c;
+      }
+
+      .player-input-bubble {
+        background: rgba(232, 245, 243, 0.85);
+        padding: 12px 16px;
+        border-radius: 12px;
+        backdrop-filter: blur(10px);
+        max-width: 90%;
+        margin-left: auto;
+      }
+
+      .blank-input {
+        display: inline-block;
+        min-width: 150px;
+        padding: 4px 10px;
+        border: none;
+        border-bottom: 2px solid #2c3e3c;
+        background: transparent;
+        font-size: 14px;
+        color: #2c3e3c;
+        font-weight: 500;
+        margin: 0 4px;
+      }
+
+      .blank-input:focus {
+        outline: none;
+        border-bottom-color: #e85d4d;
+      }
+
+      .send-btn {
+        background: #2c3e3c;
+        color: #f5f1e8;
+        padding: 6px 20px;
+        border: none;
+        border-radius: 6px;
+        font-size: 12px;
+        font-weight: 600;
+        cursor: pointer;
+        margin-top: 10px;
+        transition: all 0.3s;
+        display: block;
+        margin-left: auto;
+      }
+
+      .send-btn:hover {
+        background: #e85d4d;
+        transform: translateY(-1px);
+      }
+
+      /* Timer text under Send button */
+      .response-timer-text {
+        margin-top: 6px;
+        font-size: 14px;
+        font-style: italic;
+        color: #e24450;
+        text-align: right;
+        padding-right: 4px;
+      }
+
+      /* Edit icon next to bracketed text */
+      .edit-icon {
+        cursor: pointer;
+        margin-left: 6px;
+        font-size: 14px;
+        opacity: 0.7;
+      }
+      .edit-icon:hover {
+        opacity: 1;
+      }
+
+      /* RIGHT SIDEBAR */
+      .sidebar-right {
+        background: #b8d4cc;
+        padding: 20px 15px;
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+        overflow: hidden;
+      }
+
+      .score-card {
+        background: rgba(245, 241, 232, 0.95);
+        padding: 18px;
+        border-radius: 12px;
+        text-align: center;
+      }
+
+      .score-label {
+        font-size: 13px;
+        color: #2c3e3c;
+        font-weight: 700;
+        margin-bottom: 8px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+      }
+
+      .score-value {
+        font-size: 56px;
+        font-weight: 700;
+        color: #2c3e3c;
+        line-height: 1;
+      }
+
+      .chart-section {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        min-height: 0;
+      }
+
+      .chart-title {
+        font-size: 14px;
+        font-weight: 700;
+        color: #2c3e3c;
+        margin-bottom: 12px;
+        text-align: center;
+      }
+
+      .chart-legend {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px 12px;
+        margin-bottom: 15px;
+        justify-content: center;
+      }
+
+      .legend-item {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        font-size: 10px;
+        color: #2c3e3c;
+        font-weight: 600;
+      }
+
+      .legend-dot {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+      }
+
+      .chart-canvas {
+        flex: 1;
+        background: rgba(255, 255, 255, 0.6);
+        border-radius: 10px;
+        padding: 15px;
+        position: relative;
+        min-height: 200px;
+      }
+
+      /* Modals */
+      .modal {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(44, 62, 60, 0.85);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 1000;
+      }
+
+      .modal-content {
+        background: #f5f1e8;
+        padding: 40px;
+        border-radius: 20px;
+        max-width: 500px;
+        max-height: 80vh;
+        overflow-y: auto;
+      }
+
+      .modal-title {
+        font-size: 24px;
+        font-weight: 700;
+        margin-bottom: 20px;
+        color: #2c3e3c;
+        text-align: center;
+      }
+
+      .modal-text {
+        line-height: 1.7;
+        color: #2c3e3c;
+        margin-bottom: 15px;
+        font-size: 14px;
+      }
+
+      .form-group {
+        margin-bottom: 18px;
+      }
+      .form-label {
+        display: block;
+        margin-bottom: 6px;
+        font-weight: 700;
+        color: #2c3e3c;
+        font-size: 13px;
+      }
+
+      .form-input,
+      .form-select {
+        width: 100%;
+        padding: 12px 15px;
+        border: 2px solid #b8d4cc;
+        border-radius: 8px;
+        font-size: 14px;
+        background: white;
+        color: #2c3e3c;
+      }
+
+      .form-input:focus,
+      .form-select:focus {
+        outline: none;
+        border-color: #2c3e3c;
+      }
+
+      .error-message {
+        color: #e85d4d;
+        margin-bottom: 12px;
+        font-size: 12px;
+        font-weight: 600;
+        text-align: center;
+      }
+
+      .modal-btn {
+        width: 100%;
+        background: #2c3e3c;
+        color: #f5f1e8;
+        padding: 14px;
+        border: none;
+        border-radius: 8px;
+        font-size: 15px;
+        font-weight: 700;
+        cursor: pointer;
+        margin-top: 12px;
+        transition: all 0.3s;
+      }
+
+      .modal-btn:hover {
+        background: #e85d4d;
+      }
+      .close-modal-btn {
+        background: #8ba89c;
+        margin-top: 15px;
+      }
+
+      .hidden {
+        display: none !important;
+      }
+
+      .success-box {
+        margin-top: 20px;
+        padding: 15px;
+        background: #7db386;
+        border-radius: 10px;
+        text-align: center;
+      }
+
+      .success-box p {
+        color: white;
+        font-weight: 600;
+        margin-bottom: 6px;
+        font-size: 13px;
+      }
+
+      /* Story Modal Styles */
+      .story-modal-content {
+        background: #f5f1e8;
+        border-radius: 20px;
+        width: 85vw;
+        height: 85vh;
+        max-width: 1400px;
+        max-height: 900px;
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+      }
+
+      .story-modal-header {
+        background: #2c3e3c;
+        color: #f5f1e8;
+        padding: 20px 30px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-radius: 20px 20px 0 0;
+      }
+
+      .story-modal-title {
+        font-size: 24px;
+        font-weight: 700;
+        margin: 0;
+      }
+
+      .story-close-btn {
+        background: transparent;
+        border: none;
+        color: #f5f1e8;
+        font-size: 36px;
+        cursor: pointer;
+        line-height: 1;
+        padding: 0;
+        width: 40px;
+        height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: transform 0.2s;
+      }
+
+      .story-close-btn:hover {
+        transform: scale(1.2);
+      }
+
+      .story-modal-body {
+        display: flex;
+        flex: 1;
+        overflow: hidden;
+      }
+
+      .story-left-column {
+        flex: 2;
+        border-right: 2px solid #b8d4cc;
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+      }
+
+      .story-right-column {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        background: rgba(184, 212, 204, 0.15);
+      }
+
+      .story-content-scroll {
+        flex: 1;
+        overflow-y: auto;
+        padding: 25px 30px;
+      }
+
+      .story-content-scroll::-webkit-scrollbar {
+        width: 8px;
+      }
+
+      .story-content-scroll::-webkit-scrollbar-track {
+        background: rgba(184, 212, 204, 0.3);
+        border-radius: 10px;
+      }
+
+      .story-content-scroll::-webkit-scrollbar-thumb {
+        background: #8ba89c;
+        border-radius: 10px;
+      }
+
+      .story-chapter {
+        margin-bottom: 15px;
+      }
+
+      .story-chapter-header {
+        background: #8ba89c;
+        padding: 15px 20px;
+        border-radius: 10px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        transition: all 0.3s;
+      }
+
+      .story-chapter-header:hover {
+        background: #7a9688;
+        transform: translateX(5px);
+      }
+
+      .chapter-arrow {
+        font-size: 14px;
+        color: #2c3e3c;
+        font-weight: 700;
+        transition: transform 0.2s;
+        width: 20px;
+      }
+
+      .chapter-title {
+        font-size: 16px;
+        font-weight: 700;
+        color: #2c3e3c;
+        flex: 1;
+      }
+
+      .story-chapter-body {
+        padding: 20px 25px;
+        background: rgba(255, 255, 255, 0.5);
+        border-radius: 0 0 10px 10px;
+        margin-top: -5px;
+      }
+
+      .story-item-header {
+        font-size: 15px;
+        font-weight: 700;
+        color: #2c3e3c;
+        margin-bottom: 10px;
+        margin-top: 15px;
+      }
+
+      .story-item-header:first-child {
+        margin-top: 0;
+      }
+
+      .story-item-text {
+        font-size: 14px;
+        line-height: 1.7;
+        color: #2c3e3c;
+        margin-bottom: 15px;
+        white-space: pre-line;
+      }
+
+      .comments-section {
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+        padding: 20px;
+      }
+
+      .comments-header {
+        font-size: 18px;
+        font-weight: 700;
+        color: #2c3e3c;
+        margin-bottom: 15px;
+        text-align: center;
+      }
+
+      .comments-display {
+        flex: 1;
+        overflow-y: auto;
+        padding: 15px;
+        background: rgba(255, 255, 255, 0.6);
+        border-radius: 10px;
+        margin-bottom: 15px;
+        min-height: 200px;
+      }
+
+      .comments-display::-webkit-scrollbar {
+        width: 6px;
+      }
+
+      .comments-display::-webkit-scrollbar-track {
+        background: rgba(184, 212, 204, 0.3);
+        border-radius: 10px;
+      }
+
+      .comments-display::-webkit-scrollbar-thumb {
+        background: #8ba89c;
+        border-radius: 10px;
+      }
+
+      .comment-item {
+        background: #f5f1e8;
+        padding: 12px 15px;
+        border-radius: 8px;
+        margin-bottom: 10px;
+        border-left: 3px solid #8ba89c;
+      }
+
+      .comment-time {
+        font-size: 10px;
+        color: #6b7c78;
+        margin-bottom: 5px;
+      }
+
+      .comment-text {
+        font-size: 13px;
+        line-height: 1.5;
+        color: #2c3e3c;
+      }
+
+      .comment-input-box {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+      }
+
+      .comment-input {
+        width: 100%;
+        padding: 12px;
+        border: 2px solid #b8d4cc;
+        border-radius: 8px;
+        font-size: 13px;
+        font-family: 'Segoe UI', 'Inter', 'Arial', sans-serif;
+        resize: vertical;
+        background: white;
+        color: #2c3e3c;
+      }
+
+      .comment-input:focus {
+        outline: none;
+        border-color: #2c3e3c;
+      }
+
+      .comment-send-btn {
+        background: #2c3e3c;
+        color: #f5f1e8;
+        padding: 10px;
+        border: none;
+        border-radius: 6px;
+        font-size: 13px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s;
+      }
+
+      .comment-send-btn:hover {
+        background: #e85d4d;
+        transform: translateY(-1px);
+      }
+    </style>
+  </head>
+
+  <body>
+    <!-- Mobile Warning -->
+    <div class="mobile-warning">
+      <div class="mobile-warning-content">
+        <h2>📱 Desktop Required</h2>
+        <p>
+          This experience is optimized for laptop, desktop, or tablet devices.
+        </p>
+        <p style="margin-top: 15px">
+          Please open on a larger screen for the best experience.
+        </p>
+      </div>
+    </div>
+
+    <div class="container">
+      <!-- LEFT SIDEBAR -->
+      <div class="sidebar-left">
+        <div class="game-title">RPG #001</div>
+        <h2 class="story-header">THE LAST NIGHT AT EMBER &amp; SPOON</h2>
+
+        <div class="story-image">
+          <img
+            src="https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=300&h=300&fit=crop"
+            alt="Restaurant"
+            onerror="this.parentElement.innerHTML='🍽️'"
+          />
+        </div>
+
+        <div class="info-section">
+          <div class="info-label">Industry:</div>
+          <div class="info-value">F&amp;B</div>
+        </div>
+
+        <div class="info-section">
+          <div class="info-label">Loc:</div>
+          <div class="info-value">SINGAPORE</div>
+        </div>
+
+        <div class="info-section">
+          <div class="info-label">Lifespan:</div>
+          <div class="info-value">5 YEARS</div>
+        </div>
+
+        <div class="info-section">
+          <div class="info-label">Current Situation:</div>
+          <div class="info-value">Last night before permanent close</div>
+        </div>
+
+        <div class="bottom-actions">
+          <div class="action-icon" onclick="alert('User Profile')">
+            <div class="icon-circle">👤</div>
+            <div class="icon-label">User<br />Profile</div>
+          </div>
+          <div class="action-icon" onclick="alert('Ask Questions')">
+            <div class="icon-circle">❓</div>
+            <div class="icon-label">Ask<br />Questions</div>
+          </div>
+          <div class="action-icon" onclick="alert('Report Issues')">
+            <div class="icon-circle">⚠️</div>
+            <div class="icon-label">Report<br />Issues</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- CENTER CONTENT -->
+      <div class="main-content">
+        <div class="conversation-header">
+          <div class="nav-arrow">‹</div>
+          <span>THE CONVERSATION</span>
+          <div class="nav-arrow">›</div>
+        </div>
+
+        <div class="conversation-scroll-area" id="conversation-history"></div>
+
+        <div
+          class="response-input-area"
+          id="response-input-area"
+          style="display: none"
+        >
+          <div id="current-player-input"></div>
+        </div>
+      </div>
+
+      <!-- RIGHT SIDEBAR -->
+      <div class="sidebar-right">
+        <div class="top-actions">
+          <div class="icon-btn" onclick="showStoryline()">
+            <div class="icon-btn-circle">📖</div>
+            <div class="icon-btn-label">Story Line</div>
+          </div>
+          <div class="icon-btn" onclick="showRoles()">
+            <div class="icon-btn-circle">👥</div>
+            <div class="icon-btn-label">View Roles</div>
+          </div>
+          <div class="icon-btn" onclick="showHint()">
+            <div class="icon-btn-circle">💡</div>
+            <div class="icon-btn-label">Hint</div>
+          </div>
+        </div>
+
+        <div class="score-card">
+          <div class="score-label">TOTAL SCORE</div>
+          <div class="score-value" id="total-score">0</div>
+        </div>
+
+        <div class="chart-section">
+          <div class="chart-title">Mindset Demonstrated</div>
+
+          <div class="chart-legend">
+            <div class="legend-item">
+              <div class="legend-dot" style="background: #e85d4d"></div>
+              <span>Resource Craftsman</span>
+            </div>
+            <div class="legend-item">
+              <div class="legend-dot" style="background: #2c3e3c"></div>
+              <span>System Thinker</span>
+            </div>
+            <div class="legend-item">
+              <div class="legend-dot" style="background: #6b9db5"></div>
+              <span>Experimenter</span>
+            </div>
+            <div class="legend-item">
+              <div class="legend-dot" style="background: #8ba89c"></div>
+              <span>Calm Strategist</span>
+            </div>
+            <div class="legend-item">
+              <div class="legend-dot" style="background: #4dd8c6"></div>
+              <span>Value Hunter</span>
+            </div>
+          </div>
+
+          <div class="chart-canvas" id="chart-canvas">
+            <canvas id="mindset-chart" width="100%" height="100%"></canvas>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Generic modal -->
+    <div id="modal" class="modal hidden">
+      <div class="modal-content">
+        <div class="modal-title" id="modal-title"></div>
+        <div id="modal-body"></div>
+        <button class="modal-btn close-modal-btn" onclick="closeModal()">
+          Close
+        </button>
+      </div>
+    </div>
+
+    <!-- Player info modal -->
+    <div id="player-info-modal" class="modal">
+      <div class="modal-content">
+        <div class="modal-title">Welcome to Ember &amp; Spoon</div>
+        <p class="modal-text" style="text-align: center">
+          Please enter your details to begin:
+        </p>
+
+        <div class="form-group">
+          <label class="form-label">Player Code *</label>
+          <input
+            type="text"
+            id="player-code"
+            class="form-input"
+            placeholder="Enter code (e.g., P001)"
+          />
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Your Role *</label>
+          <select id="player-role" class="form-select">
+            <option value="">-- Select your role --</option>
+            <option value="The Chef (Mira)">The Chef (Mira)</option>
+            <option value="The Restaurant Owner (Kenji)">
+              The Restaurant Owner (Kenji)
+            </option>
+            <option value="The Floor Manager (Aiden)">
+              The Floor Manager (Aiden)
+            </option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Computer's Role *</label>
+          <select id="computer-role" class="form-select">
+            <option value="">-- Select computer's role --</option>
+            <option value="The Restaurant Owner (Kenji)">
+              The Restaurant Owner (Kenji)
+            </option>
+            <option value="The Chef (Mira)">The Chef (Mira)</option>
+            <option value="The Floor Manager (Aiden)">
+              The Floor Manager (Aiden)
+            </option>
+          </select>
+        </div>
+
+        <div id="player-info-error" class="error-message hidden"></div>
+        <button onclick="startGame()" class="modal-btn">START GAME</button>
+      </div>
+    </div>
+
+    <!-- Story Modal -->
+    <div id="story-modal" class="modal hidden">
+      <div class="story-modal-content">
+        <div class="story-modal-header">
+          <h2 class="story-modal-title" id="story-modal-title"></h2>
+          <button class="story-close-btn" onclick="closeStoryModal()">×</button>
+        </div>
+
+        <div class="story-modal-body">
+          <div class="story-left-column">
+            <div id="story-content-area" class="story-content-scroll"></div>
+          </div>
+
+          <div class="story-right-column">
+            <div class="comments-section">
+              <div class="comments-header">My Notes</div>
+              <div id="comments-display" class="comments-display"></div>
+              <div class="comment-input-box">
+                <textarea
+                  id="comment-input"
+                  class="comment-input"
+                  placeholder="Add your reflection..."
+                  rows="3"
+                ></textarea>
+                <button class="comment-send-btn" onclick="sendComment()">Send</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="conversation_data.js"></script>
+    <script src="answer_key_data.js"></script>
+    <script src="view-story.js"></script>
+    <script src="game-ui.js"></script>
+    <script src="game-logic.js"></script>
+  </body>
+</html>
