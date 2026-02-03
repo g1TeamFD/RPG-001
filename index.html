@@ -657,6 +657,257 @@
         margin-bottom: 6px;
         font-size: 13px;
       }
+
+      /* Story Modal Styles */
+      .story-modal-content {
+        background: #f5f1e8;
+        border-radius: 20px;
+        width: 85vw;
+        height: 85vh;
+        max-width: 1400px;
+        max-height: 900px;
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+      }
+
+      .story-modal-header {
+        background: #2c3e3c;
+        color: #f5f1e8;
+        padding: 20px 30px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-radius: 20px 20px 0 0;
+      }
+
+      .story-modal-title {
+        font-size: 24px;
+        font-weight: 700;
+        margin: 0;
+      }
+
+      .story-close-btn {
+        background: transparent;
+        border: none;
+        color: #f5f1e8;
+        font-size: 36px;
+        cursor: pointer;
+        line-height: 1;
+        padding: 0;
+        width: 40px;
+        height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: transform 0.2s;
+      }
+
+      .story-close-btn:hover {
+        transform: scale(1.2);
+      }
+
+      .story-modal-body {
+        display: flex;
+        flex: 1;
+        overflow: hidden;
+      }
+
+      .story-left-column {
+        flex: 2;
+        border-right: 2px solid #b8d4cc;
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+      }
+
+      .story-right-column {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        background: rgba(184, 212, 204, 0.15);
+      }
+
+      .story-content-scroll {
+        flex: 1;
+        overflow-y: auto;
+        padding: 25px 30px;
+      }
+
+      .story-content-scroll::-webkit-scrollbar {
+        width: 8px;
+      }
+
+      .story-content-scroll::-webkit-scrollbar-track {
+        background: rgba(184, 212, 204, 0.3);
+        border-radius: 10px;
+      }
+
+      .story-content-scroll::-webkit-scrollbar-thumb {
+        background: #8ba89c;
+        border-radius: 10px;
+      }
+
+      .story-chapter {
+        margin-bottom: 15px;
+      }
+
+      .story-chapter-header {
+        background: #8ba89c;
+        padding: 15px 20px;
+        border-radius: 10px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        transition: all 0.3s;
+      }
+
+      .story-chapter-header:hover {
+        background: #7a9688;
+        transform: translateX(5px);
+      }
+
+      .chapter-arrow {
+        font-size: 14px;
+        color: #2c3e3c;
+        font-weight: 700;
+        transition: transform 0.2s;
+        width: 20px;
+      }
+
+      .chapter-title {
+        font-size: 16px;
+        font-weight: 700;
+        color: #2c3e3c;
+        flex: 1;
+      }
+
+      .story-chapter-body {
+        padding: 20px 25px;
+        background: rgba(255, 255, 255, 0.5);
+        border-radius: 0 0 10px 10px;
+        margin-top: -5px;
+      }
+
+      .story-item-header {
+        font-size: 15px;
+        font-weight: 700;
+        color: #2c3e3c;
+        margin-bottom: 10px;
+        margin-top: 15px;
+      }
+
+      .story-item-header:first-child {
+        margin-top: 0;
+      }
+
+      .story-item-text {
+        font-size: 14px;
+        line-height: 1.7;
+        color: #2c3e3c;
+        margin-bottom: 15px;
+        white-space: pre-line;
+      }
+
+      .comments-section {
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+        padding: 20px;
+      }
+
+      .comments-header {
+        font-size: 18px;
+        font-weight: 700;
+        color: #2c3e3c;
+        margin-bottom: 15px;
+        text-align: center;
+      }
+
+      .comments-display {
+        flex: 1;
+        overflow-y: auto;
+        padding: 15px;
+        background: rgba(255, 255, 255, 0.6);
+        border-radius: 10px;
+        margin-bottom: 15px;
+        min-height: 200px;
+      }
+
+      .comments-display::-webkit-scrollbar {
+        width: 6px;
+      }
+
+      .comments-display::-webkit-scrollbar-track {
+        background: rgba(184, 212, 204, 0.3);
+        border-radius: 10px;
+      }
+
+      .comments-display::-webkit-scrollbar-thumb {
+        background: #8ba89c;
+        border-radius: 10px;
+      }
+
+      .comment-item {
+        background: #f5f1e8;
+        padding: 12px 15px;
+        border-radius: 8px;
+        margin-bottom: 10px;
+        border-left: 3px solid #8ba89c;
+      }
+
+      .comment-time {
+        font-size: 10px;
+        color: #6b7c78;
+        margin-bottom: 5px;
+      }
+
+      .comment-text {
+        font-size: 13px;
+        line-height: 1.5;
+        color: #2c3e3c;
+      }
+
+      .comment-input-box {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+      }
+
+      .comment-input {
+        width: 100%;
+        padding: 12px;
+        border: 2px solid #b8d4cc;
+        border-radius: 8px;
+        font-size: 13px;
+        font-family: 'Segoe UI', 'Inter', 'Arial', sans-serif;
+        resize: vertical;
+        background: white;
+        color: #2c3e3c;
+      }
+
+      .comment-input:focus {
+        outline: none;
+        border-color: #2c3e3c;
+      }
+
+      .comment-send-btn {
+        background: #2c3e3c;
+        color: #f5f1e8;
+        padding: 10px;
+        border: none;
+        border-radius: 6px;
+        font-size: 13px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s;
+      }
+
+      .comment-send-btn:hover {
+        background: #e85d4d;
+        transform: translateY(-1px);
+      }
     </style>
   </head>
 
@@ -860,9 +1111,42 @@
       </div>
     </div>
 
+    <!-- Story Modal -->
+    <div id="story-modal" class="modal hidden">
+      <div class="story-modal-content">
+        <div class="story-modal-header">
+          <h2 class="story-modal-title" id="story-modal-title"></h2>
+          <button class="story-close-btn" onclick="closeStoryModal()">×</button>
+        </div>
+
+        <div class="story-modal-body">
+          <div class="story-left-column">
+            <div id="story-content-area" class="story-content-scroll"></div>
+          </div>
+
+          <div class="story-right-column">
+            <div class="comments-section">
+              <div class="comments-header">My Notes</div>
+              <div id="comments-display" class="comments-display"></div>
+              <div class="comment-input-box">
+                <textarea
+                  id="comment-input"
+                  class="comment-input"
+                  placeholder="Add your reflection..."
+                  rows="3"
+                ></textarea>
+                <button class="comment-send-btn" onclick="sendComment()">Send</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="conversation_data.js"></script>
     <script src="answer_key_data.js"></script>
+    <script src="view-story.js"></script>
     <script src="game-ui.js"></script>
     <script src="game-logic.js"></script>
   </body>
