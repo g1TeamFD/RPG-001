@@ -964,7 +964,7 @@
             <div class="icon-circle">👤</div>
             <div class="icon-label">User<br />Profile</div>
           </div>
-          <div class="action-icon" onclick="alert('Ask Questions')">
+          <div class="action-icon" onclick="openAskQuestionsModal()">
             <div class="icon-circle">❓</div>
             <div class="icon-label">Ask<br />Questions</div>
           </div>
@@ -1126,13 +1126,13 @@
 
           <div class="story-right-column">
             <div class="comments-section">
-              <div class="comments-header">My Notes</div>
+              <div class="comments-header">What do you think?</div>
               <div id="comments-display" class="comments-display"></div>
               <div class="comment-input-box">
                 <textarea
                   id="comment-input"
                   class="comment-input"
-                  placeholder="Add your reflection..."
+                  placeholder="Type here..."
                   rows="3"
                 ></textarea>
                 <button class="comment-send-btn" onclick="sendComment()">Send</button>
@@ -1147,7 +1147,9 @@
     <script src="conversation_data.js"></script>
     <script src="answer_key_data.js"></script>
     <script src="view-story.js"></script>
+    <script src="view-roles.js"></script>
     <script src="game-ui.js"></script>
     <script src="game-logic.js"></script>
+    <script src="google-sheets-sync.js"></script>
   </body>
 </html>
