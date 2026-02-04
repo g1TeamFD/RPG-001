@@ -84,6 +84,13 @@ function startGame() {
   sessionData.computerRole = computerRole;
   sessionData.startDateTime = getSingaporeDateTime();
 
+  // GOOGLE SHEETS SYNC: Log session start (runs in background)
+  if (typeof syncSessionStart === 'function') {
+    syncSessionStart(playerCode, playerRole, computerRole, sessionData.startDateTime).catch(err => {
+      console.warn('Session sync failed (game continues):', err);
+    });
+  }
+
   document.getElementById('player-info-modal').classList.add('hidden');
   startRound();
 }
@@ -288,6 +295,13 @@ function submitResponse() {
     blankPenalty;
 
   updateScoreDisplay();
+
+  // GOOGLE SHEETS SYNC: Save round response (runs in background)
+  if (typeof syncRoundResponse === 'function') {
+    syncRoundResponse(currentRound, responses, roundScores, responseDetails.timestamp).catch(err => {
+      console.warn('Round sync failed (game continues):', err);
+    });
+  }
 
   currentRound++;
 
@@ -533,13 +547,23 @@ function sendComment() {
 
   if (commentText === '') return;
 
+  const timestamp = getSingaporeDateTime();
+
   storyComments.push({
     text: commentText,
-    timestamp: new Date().toLocaleTimeString()
+    timestamp: timestamp
   });
 
   input.value = '';
   renderComments();
+
+  // GOOGLE SHEETS SYNC: Save story comment (runs in background)
+  if (typeof syncStoryComments === 'function') {
+    const playerCode = sessionData.playerCode || 'UNKNOWN';
+    syncStoryComments(playerCode, commentText, timestamp).catch(err => {
+      console.warn('Story comment sync failed (game continues):', err);
+    });
+  }
 }
 
 function renderComments() {
@@ -564,11 +588,53 @@ function closeStoryModal() {
 }
 
 function showRoles() {
-  document.getElementById('modal-title').textContent = 'Roles';
-  document.getElementById(
-    'modal-body'
-  ).innerHTML = `<p class="modal-text"><strong>Kenji</strong> - Owner<br><strong>Mira</strong> - Chef</p>`;
-  document.getElementById('modal').classList.remove('hidden');
+  try {
+    const rolesData = window.ROLES_DATA;
+
+    if (!rolesData || rolesData.length === 0) {
+      console.error('No roles data found');
+      return;
+    }
+
+    document.getElementById('modal-title').textContent = 'All Roles';
+
+    let rolesHTML = '';
+
+    rolesData.forEach(role => {
+      const responsibilities = role.RESPONSIBILITIES
+        .split('\n\n')
+        .filter(line => line.trim())
+        .join(', ');
+
+      const mindsetsTested = [
+        role.Mindset_Tested_1,
+        role.Mindset_Tested_2,
+        role.Mindset_Tested_3,
+        role.Mindset_Tested_4,
+        role.Mindset_Tested_5
+      ]
+        .filter(mindset => mindset && mindset.trim())
+        .join(', ');
+
+      const detailsText = mindsetsTested
+        ? `${responsibilities}. Mindset Tested: ${mindsetsTested}`
+        : responsibilities;
+
+      rolesHTML += `
+        <div style="margin-bottom: 12px; padding: 10px; background: rgba(255, 255, 255, 0.5); border-radius: 6px; border-left: 3px solid #8ba89c;">
+          <div style="font-size: 13px; color: #2c3e3c; margin-bottom: 4px;">
+            <strong>${role['# Number']} — ${role.ROLES} (${role.NAME})</strong>
+          </div>
+          <div style="font-size: 12px; color: #6b7c78; line-height: 1.4;">${detailsText}</div>
+        </div>
+      `;
+    });
+
+    document.getElementById('modal-body').innerHTML = rolesHTML;
+    document.getElementById('modal').classList.remove('hidden');
+  } catch (error) {
+    console.error('Error loading roles:', error);
+  }
 }
 
 function showHint() {
@@ -599,6 +665,13 @@ function showGameEnd() {
   sessionData.endDateTime = getSingaporeDateTime();
   exportSessionData();
 
+  // GOOGLE SHEETS SYNC: Save final scores (runs in background)
+  if (typeof syncFinalScores === 'function') {
+    syncFinalScores(sessionData.playerCode, sessionData.finalScores, sessionData.endDateTime).catch(err => {
+      console.warn('Final scores sync failed (game continues):', err);
+    });
+  }
+
   document.getElementById('modal-title').textContent = 'Complete!';
   document.getElementById('modal-body').innerHTML = `
     <p class="modal-text"><strong>Score: ${Math.round(totalScore)}</strong></p>
@@ -608,7 +681,12 @@ function showGameEnd() {
 }
 
 function exportSessionData() {
-  const jsonString = JSON.stringify(sessionData, null, 2);
+  const exportData = {
+    ...sessionData,
+    storyComments: storyComments
+  };
+
+  const jsonString = JSON.stringify(exportData, null, 2);
   const blob = new Blob([jsonString], { type: 'application/json' });
   const url = URL.createObjectURL(blob);
   const link = document.createElement('a');
