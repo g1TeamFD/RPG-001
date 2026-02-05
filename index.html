@@ -639,6 +639,53 @@
         margin-top: 15px;
       }
 
+      .modal-header-with-close {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 20px;
+        gap: 15px;
+      }
+
+      .modal-close-text {
+        background: none;
+        border: none;
+        color: #2c3e3c;
+        font-size: 32px;
+        cursor: pointer;
+        padding: 0;
+        line-height: 1;
+        transition: transform 0.2s;
+        flex-shrink: 0;
+      }
+
+      .modal-close-text:hover {
+        transform: scale(1.2);
+        color: #e85d4d;
+      }
+
+
+      .decision-option-btn {
+        width: 100%;
+        background: #2c3e3c;
+        color: #f5f1e8;
+        padding: 14px;
+        border: none;
+        border-radius: 8px;
+        font-size: 14px;
+        font-weight: 600;
+        cursor: pointer;
+        margin-top: 12px;
+        transition: all 0.3s;
+        text-align: left;
+      }
+
+      .decision-option-btn:hover {
+        background: #e85d4d;
+        transform: translateY(-2px);
+      }
+
+
       .hidden {
         display: none !important;
       }
@@ -978,9 +1025,14 @@
       <!-- CENTER CONTENT -->
       <div class="main-content">
         <div class="conversation-header">
-          <div class="nav-arrow">‹</div>
-          <span>THE CONVERSATION</span>
-          <div class="nav-arrow">›</div>
+          <!-- Left arrow -->
+          <div class="nav-arrow" onclick="navigatePreviousScene()">‹</div>
+
+          <!-- Scene title -->
+          <span id="scene-title"></span>
+
+          <!-- Right arrow -->
+          <div class="nav-arrow" onclick="navigateNextScene()">›</div>
         </div>
 
         <div class="conversation-scroll-area" id="conversation-history"></div>
@@ -1052,13 +1104,22 @@
     <!-- Generic modal -->
     <div id="modal" class="modal hidden">
       <div class="modal-content">
-        <div class="modal-title" id="modal-title"></div>
+        <div class="modal-header-with-close">
+          <div class="modal-title" id="modal-title"></div>
+          <button class="modal-close-text" onclick="closeModal()">×</button>
+        </div>
         <div id="modal-body"></div>
-        <button class="modal-btn close-modal-btn" onclick="closeModal()">
-          Close
-        </button>
       </div>
     </div>
+    
+
+    <div id="decision-checkpoint-modal" class="modal hidden">
+      <div class="modal-content">
+        <h3 id="decision-question" class="modal-title"></h3>
+        <div id="decision-options"></div>
+      </div>
+    </div>
+    
 
     <!-- Player info modal -->
     <div id="player-info-modal" class="modal">
@@ -1144,12 +1205,16 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="conversation_data.js"></script>
-    <script src="answer_key_data.js"></script>
+    <script src="conversations/scene1/conversation_chef_vs_owner.js"></script>
+    <script src="conversations/scene1/answer_key_chef_vs_owner.js"></script>
+    <script src="conversations/scene2/conversation_chef_vs_owner.js"></script>
+    <script src="conversations/scene2/answer_key_chef_vs_owner.js"></script>
     <script src="view-story.js"></script>
     <script src="view-roles.js"></script>
     <script src="game-ui.js"></script>
+    <script src="scene-decisions.js"></script>
     <script src="game-logic.js"></script>
+    <script src="sceneLoader.js"></script>
     <script src="google-sheets-sync.js"></script>
   </body>
 </html>

@@ -1,0 +1,22 @@
+{
+  "scene1": {
+    "sceneID": 1,
+    "decisionCheckpoint": {
+      "question": "Would you decide to join the Restaurant Owner in the Investor meeting?",
+      "options": [
+        {
+          "optionID": "A",
+          "optionLabel": "Option A",
+          "optionText": "Yes",
+          "outcome": 2
+        },
+        {
+          "optionID": "B",
+          "optionLabel": "Option B",
+          "optionText": "No",
+          "outcome": "END_GAME"
+        }
+      ]
+    }
+  }
+}

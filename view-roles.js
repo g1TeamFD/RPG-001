@@ -21,9 +21,9 @@ const ROLES_DATA = [
     "RESPONSIBILITIES": "Ingredient usage\n\nQuality\n\nMenu adaptation\n\nMorale",
     "Mindset_Tested_1": "Experimenter",
     "Mindset_Tested_2": "Resource Craftsman",
-    "Mindset_Tested_3": "",
-    "Mindset_Tested_4": "",
-    "Mindset_Tested_5": ""
+    "Mindset_Tested_3": "Systems Thinker",
+    "Mindset_Tested_4": "Value Hunter",
+    "Mindset_Tested_5": "Calm Strategist"
   },
   {
     "Deck": "#001. THE LAST NIGHT AT EMBER & SPOON",

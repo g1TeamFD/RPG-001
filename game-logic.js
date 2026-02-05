@@ -2,6 +2,13 @@
 // GAME LOGIC - Core Mechanics and Scoring
 // ============================================
 
+// === SCENE CONFIG (SAFE v1) ===
+const SCENE_END_ROUNDS = {
+  1: 10, // Scene 1 ends at round 10
+  2:9 // Scene 2 ends at round 9
+};
+
+
 // Game State
 let currentRound = 1;
 let currentStep = 0;
@@ -40,6 +47,8 @@ let sessionData = {
 
 // Story Comments (Session-scoped, in-memory)
 let storyComments = [];
+let sceneConversations = {};
+window.sceneConversations = sceneConversations;
 let currentExpandedChapter = null;
 
 // Initialize
@@ -48,6 +57,12 @@ window.onload = function () {
   document.getElementById('player-info-modal').classList.remove('hidden');
   initChart();
 };
+
+// Global data references (populated by sceneLoader)
+window.CONVERSATION_DATA = [];
+window.ANSWER_KEY_DATA = [];
+window.SCENE_META = {};
+
 
 // Global exposure
 window.startGame = startGame;
@@ -73,27 +88,78 @@ function startGame() {
     errorDiv.classList.remove('hidden');
     return;
   }
+
   if (playerRole === computerRole) {
     errorDiv.textContent = 'Roles must be different';
     errorDiv.classList.remove('hidden');
     return;
   }
 
+  // Existing assignments (KEEP)
   sessionData.playerCode = playerCode;
   sessionData.playerRole = playerRole;
   sessionData.computerRole = computerRole;
   sessionData.startDateTime = getSingaporeDateTime();
 
-  // GOOGLE SHEETS SYNC: Log session start (runs in background)
+  // === GAME SESSION INIT (Non-breaking, CORRECT PLACE) ===
+  const gameSession = {
+    playerRole: playerRole,
+    computerRole: computerRole,
+    currentScene: 1,
+    scoreState: {
+      systemsThinker: 0,
+      resourceCraftsman: 0,
+      calmStrategist: 0,
+      valueHunter: 0,
+      experimenter: 0,
+    },
+    totalScore: 0,
+    sceneHistory: [],
+    playerDecisions: {}
+  };
+
+  sessionStorage.setItem("gameSession", JSON.stringify(gameSession));
+
+  // GOOGLE SHEETS SYNC (unchanged)
   if (typeof syncSessionStart === 'function') {
-    syncSessionStart(playerCode, playerRole, computerRole, sessionData.startDateTime).catch(err => {
+    syncSessionStart(
+      playerCode,
+      playerRole,
+      computerRole,
+      sessionData.startDateTime
+    ).catch(err => {
       console.warn('Session sync failed (game continues):', err);
     });
   }
 
   document.getElementById('player-info-modal').classList.add('hidden');
-  startRound();
+  
+  // Initialize Scene 1 conversation data
+  if (window.SCENE_DATA && window.SCENE_DATA[1]) {
+    window.CONVERSATION_DATA = window.SCENE_DATA[1].conversation;
+    window.ANSWER_KEY_DATA = window.SCENE_DATA[1].answerKey;
+    window.SCENE_META = window.SCENE_META_1;
+    // Store Scene 1 metadata in sceneMetaHistory for navigation
+if (!gameSession.sceneMetaHistory) {
+  gameSession.sceneMetaHistory = {};
 }
+gameSession.sceneMetaHistory[1] = window.SCENE_META;
+sessionStorage.setItem("gameSession", JSON.stringify(gameSession));
+
+  } else {
+    // Show error message if no conversation available
+    alert('Please come back later or select another roles');
+    document.getElementById('player-info-modal').classList.remove('hidden');
+    return;
+  }
+  
+  startRound();
+  // Update scene title header for Scene 1
+updateSceneTitle();
+
+}
+
+
 
 function getSingaporeDateTime() {
   const now = new Date();
@@ -116,13 +182,18 @@ function startRound() {
 }
 
 function displayCurrentTurn() {
-  const turnData = CONVERSATION_DATA.find(
-    (d) =>
-      d.round === currentRound &&
-      (currentStep === 0 ? d.speaker === 'Kenji' : d.speaker === 'Mira')
-  );
+  // Validate CONVERSATION_DATA exists
+  if (!CONVERSATION_DATA) {
+    console.error('CONVERSATION_DATA is undefined. Scene may not have loaded properly.');
+    return;
+  }
+  
+  // Get all turns for the current round, then use currentStep as an index
+  const roundTurns = CONVERSATION_DATA.filter(d => d.round === currentRound);
+  const turnData = roundTurns[currentStep];
 
   if (!turnData) return;
+
 
   const conversationHistory = document.getElementById('conversation-history');
 
@@ -296,6 +367,16 @@ function submitResponse() {
 
   updateScoreDisplay();
 
+  // === Persist cumulative score to session (Non-breaking) ===
+  const savedSession = JSON.parse(sessionStorage.getItem("gameSession"));
+  if (savedSession) {
+    savedSession.scoreState = { ...mindsetScores };
+    savedSession.totalScore = totalScore;
+    sessionStorage.setItem("gameSession", JSON.stringify(savedSession));
+  }
+
+
+
   // GOOGLE SHEETS SYNC: Save round response (runs in background)
   if (typeof syncRoundResponse === 'function') {
     syncRoundResponse(currentRound, responses, roundScores, responseDetails.timestamp).catch(err => {
@@ -305,13 +386,27 @@ function submitResponse() {
 
   currentRound++;
 
-  const maxRounds = Math.max(...CONVERSATION_DATA.map((d) => d.round));
+  const gameSession = JSON.parse(sessionStorage.getItem("gameSession"));
+  const sceneID = gameSession?.currentScene || 1;
 
-  if (currentRound <= maxRounds) {
+  // fallback to legacy behavior if scene config missing
+  const sceneEndRound =
+    SCENE_END_ROUNDS[sceneID] ??
+    Math.max(...CONVERSATION_DATA.map(d => d.round));
+
+  if (currentRound <= sceneEndRound) {
     setTimeout(() => startRound(), 2000);
   } else {
-    setTimeout(() => showGameEnd(), 1500);
+    setTimeout(() => {
+      if (typeof showDecisionCheckpoint === 'function') {
+        showDecisionCheckpoint(sceneID);
+      } else {
+        showGameEnd();
+      }
+    }, 1500);
   }
+
+  
 }
 
 // (everything below is unchanged)
@@ -699,3 +794,174 @@ function exportSessionData() {
   document.body.removeChild(link);
   URL.revokeObjectURL(url);
 }
+function showDecisionCheckpoint(sceneID) {
+  try {
+    console.log('DEBUG: showDecisionCheckpoint called with sceneID:', sceneID);
+    
+    const decisions = window.SCENE_DECISIONS;
+    console.log('DEBUG: Decisions loaded:', decisions);
+    
+    const scene = decisions[`scene${sceneID}`];
+    if (!scene) {
+      console.error(`Scene ${sceneID} not found in decisions data`);
+      showGameEnd();
+      return;
+    }
+
+    console.log('DEBUG: Scene data found:', scene);
+
+    document.getElementById("decision-question").innerText =
+      scene.decisionCheckpoint.question;
+
+    const optionsContainer = document.getElementById("decision-options");
+    optionsContainer.innerHTML = "";
+
+    scene.decisionCheckpoint.options.forEach((opt, index) => {
+      const btn = document.createElement("button");
+      btn.className = "modal-btn decision-option-btn";
+      btn.innerText = `${opt.optionLabel}: ${opt.optionText}`;
+      btn.onclick = () => handleDecision(sceneID, opt);
+      optionsContainer.appendChild(btn);
+      console.log('DEBUG: Option button created:', index + 1, opt.optionLabel);
+    });
+
+    document.getElementById("decision-checkpoint-modal").classList.remove("hidden");
+    console.log('DEBUG: Decision checkpoint modal displayed');
+  } catch (error) {
+    console.error('ERROR in showDecisionCheckpoint:', error);
+    alert(`Error loading decision checkpoint: ${error.message}`);
+    showGameEnd();
+  }
+}
+
+
+
+function handleDecision(sceneID, option) {
+  const gameSession = JSON.parse(sessionStorage.getItem("gameSession"));
+  gameSession.playerDecisions[`scene${sceneID}`] = option.optionID;
+  sessionStorage.setItem("gameSession", JSON.stringify(gameSession));
+
+  document.getElementById("decision-checkpoint-modal").classList.add("hidden");
+
+  if (option.outcome === "END_GAME") {
+    showGameEnd();
+  } else {
+    loadScene(option.outcome);
+  }
+}
+
+// ============================================
+// SCENE NAVIGATION & CONVERSATION HISTORY
+// ============================================
+
+function updateSceneTitle() {
+  const sceneTitle = window.SCENE_META?.sceneTitle || 'THE CONVERSATION';
+  const titleElement = document.getElementById('scene-title');
+  if (titleElement) {
+    titleElement.textContent = sceneTitle;
+  }
+}
+
+function saveCurrentSceneConversation() {
+  const gameSession = JSON.parse(sessionStorage.getItem("gameSession"));
+  if (!gameSession) return;
+
+  const conversationHistory = document.getElementById('conversation-history');
+  const conversationHTML = conversationHistory.innerHTML;
+
+  if (!gameSession.conversationHistory) {
+    gameSession.conversationHistory = {};
+  }
+
+  gameSession.conversationHistory[gameSession.currentScene] = conversationHTML;
+  sessionStorage.setItem("gameSession", JSON.stringify(gameSession));
+  
+  console.log(`✅ Saved conversation history for scene ${gameSession.currentScene}`);
+}
+
+function loadSceneConversation(sceneID) {
+  const gameSession = JSON.parse(sessionStorage.getItem("gameSession"));
+  if (!gameSession) return;
+
+  const conversationHistory = document.getElementById('conversation-history');
+  
+  if (gameSession.conversationHistory && gameSession.conversationHistory[sceneID]) {
+    conversationHistory.innerHTML = gameSession.conversationHistory[sceneID];
+    
+    // Hide the response input area when viewing history
+    document.getElementById('response-input-area').style.display = 'none';
+    
+    scrollToBottom();
+    console.log(`✅ Loaded conversation history for scene ${sceneID}`);
+  } else {
+    console.warn(`No conversation history found for scene ${sceneID}`);
+  }
+}
+
+function navigatePreviousScene() {
+  const gameSession = JSON.parse(sessionStorage.getItem("gameSession"));
+  if (!gameSession) return;
+
+  const currentScene = gameSession.currentScene;
+  const previousScene = currentScene - 1;
+
+  if (previousScene < 1) {
+    console.warn('No previous scene available');
+    return;
+  }
+
+  // Save current scene conversation before switching
+  saveCurrentSceneConversation();
+
+  // Load previous scene conversation
+  loadSceneConversation(previousScene);
+  
+  // Update header to show previous scene title
+  const previousSceneTitle = gameSession.sceneMetaHistory && gameSession.sceneMetaHistory[previousScene]
+    ? gameSession.sceneMetaHistory[previousScene].sceneTitle
+    : `Scene ${previousScene}`;
+  
+  const titleElement = document.getElementById('scene-title');
+  if (titleElement) {
+    titleElement.textContent = previousSceneTitle;
+  }
+}
+
+function navigateNextScene() {
+  const gameSession = JSON.parse(sessionStorage.getItem("gameSession"));
+  if (!gameSession) return;
+
+  const currentScene = gameSession.currentScene;
+  const nextScene = currentScene + 1;
+
+  // Check if next scene has been played
+  if (!gameSession.conversationHistory || !gameSession.conversationHistory[nextScene]) {
+    console.warn('Next scene has not been played yet');
+    return;
+  }
+
+  // Save current scene conversation before switching
+  saveCurrentSceneConversation();
+
+  // Load next scene conversation
+  loadSceneConversation(nextScene);
+  
+  // Update header to show next scene title
+  const nextSceneTitle = gameSession.sceneMetaHistory && gameSession.sceneMetaHistory[nextScene]
+    ? gameSession.sceneMetaHistory[nextScene].sceneTitle
+    : `Scene ${nextScene}`;
+  
+  const titleElement = document.getElementById('scene-title');
+  if (titleElement) {
+    titleElement.textContent = nextSceneTitle;
+  }
+}
+
+window.updateSceneTitle = updateSceneTitle;
+window.navigatePreviousScene = navigatePreviousScene;
+window.navigateNextScene = navigateNextScene;
+window.saveCurrentSceneConversation = saveCurrentSceneConversation;
+window.loadSceneConversation = loadSceneConversation;
+
+
+window.showDecisionCheckpoint = showDecisionCheckpoint;
