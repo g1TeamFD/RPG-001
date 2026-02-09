@@ -61,7 +61,7 @@ async function loadScene(sceneID) {
 
 
   // For Scene 2 and beyond: Load the appropriate conversation data
-  if (sceneID === 2) {
+  if (sceneID >= 2) {
     // Reset round counter for new scene
     currentRound = 1;
     

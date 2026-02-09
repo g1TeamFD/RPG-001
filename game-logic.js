@@ -5,7 +5,11 @@
 // === SCENE CONFIG (SAFE v1) ===
 const SCENE_END_ROUNDS = {
   1: 10, // Scene 1 ends at round 10
-  2:9 // Scene 2 ends at round 9
+  2:9, // Scene 2 ends at round 9
+  3:7, // Scene 3 ends at round 7
+  4:8, // Scene 4 ends at round 8
+  5:4, // Scene 5 ends at round 4
+  6:9 // Scene 6 ends at round 9
 };
 
 
@@ -203,11 +207,33 @@ function displayCurrentTurn() {
     conversationHistory.appendChild(narrativeEl);
     typeText(narrativeEl, turnData.narrative, 15);
 
-    setTimeout(() => {
-      turnData.speaker === 'Kenji'
-        ? displayComputerDialogue(turnData)
-        : displayPlayerResponse(turnData);
-    }, turnData.narrative.length * 15 + 500);
+    // Calculate base delay for narrative completion
+    const narrativeDelay = turnData.narrative.length * 15 + 500;
+
+    // Check if resource block should appear after narrative (before dialogue)
+    if (turnData.resource || turnData.resource_guideline) {
+      setTimeout(() => {
+        const resourceBlock = createResourceBlock(turnData);
+        if (resourceBlock) {
+          conversationHistory.appendChild(resourceBlock);
+          scrollToBottom();
+        }
+        // Schedule dialogue/player response after resource block appears
+        setTimeout(() => {
+          turnData.speaker === 'Kenji'
+            ? displayComputerDialogue(turnData)
+            : displayPlayerResponse(turnData);
+        }, 1000);
+      }, narrativeDelay);
+    } else {
+      // No resource block, proceed directly to dialogue/response
+      setTimeout(() => {
+        turnData.speaker === 'Kenji'
+          ? displayComputerDialogue(turnData)
+          : displayPlayerResponse(turnData);
+      }, narrativeDelay);
+    }
+
   } else {
     turnData.speaker === 'Kenji'
       ? displayComputerDialogue(turnData)
@@ -241,11 +267,64 @@ function displayComputerDialogue(turnData) {
   scrollToBottom();
   document.getElementById('response-input-area').style.display = 'none';
 
-  setTimeout(() => {
-    currentStep = 1;
-    displayCurrentTurn();
-  }, turnData.dialogue.length * 20 + 3000);
+  // Calculate base delay for dialogue completion
+  const dialogueDelay = turnData.dialogue.length * 20 + 3000;
+
+  // Check if resource block should appear after dialogue (before next turn)
+  if (turnData.resource || turnData.resource_guideline) {
+    setTimeout(() => {
+      const resourceBlock = createResourceBlock(turnData);
+      if (resourceBlock) {
+        conversationHistory.appendChild(resourceBlock);
+        scrollToBottom();
+      }
+      // Schedule next turn after resource block appears
+      setTimeout(() => {
+        currentStep = 1;
+        displayCurrentTurn();
+      }, 1000);
+    }, dialogueDelay);
+  } else {
+    // No resource block, proceed directly to next turn
+    setTimeout(() => {
+      currentStep = 1;
+      displayCurrentTurn();
+    }, dialogueDelay);
+  }
 }
+
+
+function createResourceBlock(turnData) {
+  if (!turnData.resource && !turnData.resource_guideline) {
+    return null;
+  }
+
+  const resourceBlock = document.createElement('div');
+  resourceBlock.className = 'resource-block';
+
+  let resourceHTML = '';
+
+  if (turnData.resource && turnData.resource.trim()) {
+    resourceHTML += `
+      <div class="resource-text">
+        <span class="resource-icon">📎</span>
+        ${turnData.resource}
+      </div>
+    `;
+  }
+
+  if (turnData.resource_guideline && turnData.resource_guideline.trim()) {
+    resourceHTML += `
+      <div class="resource-guideline">
+        ${turnData.resource_guideline}
+      </div>
+    `;
+  }
+
+  resourceBlock.innerHTML = resourceHTML;
+  return resourceBlock;
+}
+
 
 function displayPlayerResponse(turnData) {
   let dialogueHTML = turnData.dialogue;
@@ -338,6 +417,15 @@ function submitResponse() {
 
   document.getElementById('response-input-area').style.display = 'none';
   scrollToBottom();
+
+  // Check if resource block should appear after player's response
+  if (currentData.resource || currentData.resource_guideline) {
+    const resourceBlock = createResourceBlock(currentData);
+    if (resourceBlock) {
+      conversationHistory.appendChild(resourceBlock);
+      scrollToBottom();
+    }
+  }
 
   sessionData.responses.push(responseDetails);
 
@@ -736,7 +824,16 @@ function showHint() {
   document.getElementById('modal-title').textContent = 'Hint';
   document.getElementById(
     'modal-body'
-  ).innerHTML = `<p class="modal-text">Think about systems thinking, resourcefulness, and calm leadership</p>`;
+    ).innerHTML = `
+    <p class="modal-text">
+      <strong>Total Score</strong>: Earn more by 
+      <br>+ Engage (Fill in all blanks with details within Time allowance)
+      <br>+ Type in your thought & questions as well
+      <br>+ Demonstrated the right mindset at the right time
+      <br>
+      <strong>Note</strong>: Each speaking round or scene tests a different mindset to varying degrees.
+    </p>
+    `;    
   document.getElementById('modal').classList.remove('hidden');
 }
 

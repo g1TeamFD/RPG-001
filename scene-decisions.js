@@ -70,6 +70,90 @@ const SCENE_DECISIONS = {
         }
       ]
     }
+  },
+  "scene4": {
+    "sceneID": 4,
+    "decisionCheckpoint": {
+      "question": "What is the biggest cost to cut?",
+      "options": [
+        {
+          "optionID": "A",
+          "optionLabel": "Option A",
+          "optionText": "Labor Cost",
+          "outcome": "END_GAME"
+        },
+        {
+          "optionID": "B",
+          "optionLabel": "Option B",
+          "optionText": "Rental Cost",
+          "outcome": "END_GAME"
+        },
+        {
+          "optionID": "C",
+          "optionLabel": "Option C",
+          "optionText": "Cost of Goods Sold",
+          "outcome": "END_GAME"
+        },
+        {
+          "optionID": "D",
+          "optionLabel": "Option D",
+          "optionText": "Nothing. The problem is not the cost",
+          "outcome": "END_GAME"
+        }
+      ]
+    }
+  },
+  "scene5": {
+    "sceneID": 5,
+    "decisionCheckpoint": {
+      "question": "How much should we buy for the next 3 months",
+      "options": [
+        {
+          "optionID": "A",
+          "optionLabel": "Option A",
+          "optionText": ">1M worth of Inventory",
+          "outcome": "END_GAME"
+        },
+        {
+          "optionID": "B",
+          "optionLabel": "Option B",
+          "optionText": "1M worth of Inventory",
+          "outcome": "END_GAME"
+        },
+        {
+          "optionID": "C",
+          "optionLabel": "Option C",
+          "optionText": "<>1M worth of Inventory",
+          "outcome": "END_GAME"
+        }
+      ]
+    }
+  },
+  "scene6": {
+    "sceneID": 6,
+    "decisionCheckpoint": {
+      "question": "Which opportunity is worth excecuting now?",
+      "options": [
+        {
+          "optionID": "A",
+          "optionLabel": "Option A",
+          "optionText": "Opportunity One — corporate bulk delivery",
+          "outcome": "END_GAME"
+        },
+        {
+          "optionID": "B",
+          "optionLabel": "Option B",
+          "optionText": "Opportunity Two — premium meal kits",
+          "outcome": "END_GAME"
+        },
+        {
+          "optionID": "C",
+          "optionLabel": "Option C",
+          "optionText": "Opportunity Three — late-night ghost kitchen for shift workers",
+          "outcome": "END_GAME"
+        }
+      ]
+    }
   }
 };
 

@@ -61,7 +61,7 @@ window.SCENE_DATA[2] = {
     speaker: 'Mira',
     role: 'The Chef',
     is_player: true,
-    narrative: 'Sarah\'s expression softens slightly. She has done this before. She said: "The brand evolves. The space closes. The memories stay with you and your customers. Look—I am not asking you to erase three years. I am asking if you are willing to carry what worked forward into a new model. Mira, you have been quiet. What is your gut telling you?"',
+    narrative: 'Sarah\'s expression softens slightly. She has done this before. She said: "The brand evolves. The space closes. The memories stay with you and your customers. Look—I am not asking you to erase the last 5 years. I am asking if you are willing to carry what worked forward into a new model. Mira, you have been quiet. What is your gut telling you?"',
     dialogue: 'My gut says [B4-1], but my head says [B4-2].',
     blanks: ['B4-1', 'B4-2']
   },

@@ -51,7 +51,7 @@ window.SCENE_DATA[1] = {
     "speaker": "Kenji",
     "role": "The Restaurant Owner",
     "narrative": "He picks up one of the containers—premium miso paste, barely used. The supplier invoice flashes in his memory: +40% price increase, three months ago.",
-    "dialogue": "I keep replaying it in my head. The rent increase. The salmon going bad. Arif leaving. The no-shows. Each thing felt... manageable at the time, you know? Like we could absorb it. When did you realize we weren't going to make it?"
+    "dialogue": "The rent increase. The salmon going bad. Arif leaving. The no-shows. Each thing felt... manageable at the time, you know? Like we could absorb it. When did you realize we weren't going to make it?"
   },
   {
     "round": 3,
@@ -67,8 +67,7 @@ window.SCENE_DATA[1] = {
     "uid": "R4-K1",
     "speaker": "Kenji",
     "role": "The Restaurant Owner",
-    "narrative": "Kenji leans against the counter, genuinely waiting for her answer. He needs to know if she saw what he missed.",
-    "dialogue": "You felt it before I admitted it... I could tell. There were moments you'd look at me during service—like you were waiting for me to say something. To change something. Why didn't you push me harder? On the menu changes. On cutting costs. On... any of it."
+    "dialogue": "I could tell. There were moments you'd look at me during service—like you were waiting for me to say something. To change something. Why didn't you push me harder? On the menu changes. On cutting costs. On... any of it."
   },
   {
     "round": 4,
@@ -85,7 +84,7 @@ window.SCENE_DATA[1] = {
     "speaker": "Kenji",
     "role": "The Restaurant Owner",
     "narrative": "A line cook drops a pot in the back. They both glance over, then back to each other. The silence feels heavier now.",
-    "dialogue": "Here's what I can't stop thinking about. Three months ago, when Johns started prioritizing retail over us, when Shila's trucks came late, when our salmon quality dropped—you adapted. You changed dishes. You made it work. But Mira... was that the right call? Should we have been adapting, or should we have been fighting back? Switching suppliers. Renegotiating. Making noise."
+    "dialogue": "Three months ago, when Johns started prioritizing retail over us, when Shila's trucks came late, when our salmon quality dropped—you adapted. You changed dishes. You made it work. But Mira... was that the right call? Should we have been adapting, or should we have been fighting back? Switching suppliers. Renegotiating. Making noise."
   },
   {
     "round": 5,
@@ -118,7 +117,7 @@ window.SCENE_DATA[1] = {
     "uid": "R7-K1",
     "speaker": "Kenji",
     "role": "The Restaurant Owner",
-    "narrative": "Kenji crosses his arms, genuinely curious now. This is the owner asking the chef—not for reassurance, but for strategy he might have missed. Then—twist—he reaches into his jacket pocket and pulls out a folded letter. Places it on the counter between them.",
+    "narrative": "There must be strategy he might have missed. He reaches into his jacket pocket and pulls out a folded letter. Places it on the counter between them.",
     "dialogue": "A week ago, I got this. An investor group. They want to buy the brand. Reopen in a smaller space. Different model—ghost kitchen, maybe. Delivery-focused. They asked if you'd be interested in staying on. As head of culinary. I didn't mention it because... honestly, I didn't think you'd want it. Was I wrong?"
   },
   {
@@ -135,7 +134,6 @@ window.SCENE_DATA[1] = {
     "uid": "R8-K1",
     "speaker": "Kenji",
     "role": "The Restaurant Owner",
-    "narrative": "The energy shifts completely. This isn't just reflection anymore—it's a live decision point. The kitchen suddenly feels less like a tomb and more like a crossroads.",
     "dialogue": "I haven't decided yet. Part of me thinks it's just delaying the inevitable. Another part thinks... maybe we were playing the wrong game. Maybe sit-down dining with our cost structure was never going to survive what's coming. But ghost kitchen? That's not why we started this. What made you stay in this industry, Mira? After all the chaos, the hours, the pressure—why are you still here, tonight, cleaning a kitchen that's closing?"
   },
   {
@@ -152,8 +150,7 @@ window.SCENE_DATA[1] = {
     "uid": "R9-K1",
     "speaker": "Kenji",
     "role": "The Restaurant Owner",
-    "narrative": "Kenji's voice is quieter now. This question matters more than the business talk. He's asking about purpose. Then, almost to himself, he looks around the kitchen one last time.",
-    "dialogue": "Yeah. Yeah, I think that's the part I lost somewhere in the spreadsheets. The reason we do this. It stopped being about the food, the people, the moment—and became about survival. Just... keeping the doors open one more month. If we had six months to rewind, knowing what we know now—and I gave you full authority over the menu, the suppliers, the pricing—what's the *one* thing you would have changed first? Not ten things. One."
+    "dialogue": "Yeah. Yeah, I think that's the part I lost somewhere in the spreadsheets. The reason we do this. It stopped being about the food, the people, the moment—and became about survival. Just... keeping the doors open one more month. If we had six months to rewind, knowing what we know now—and I gave you full authority over the menu, the suppliers, the pricing—what's the *one* thing you would have changed first? Not ten. One."
   },
   {
     "round": 9,
@@ -169,8 +166,7 @@ window.SCENE_DATA[1] = {
     "uid": "R10-K1",
     "speaker": "Kenji",
     "role": "The Restaurant Owner",
-    "narrative": "This is the final question. Kenji is genuinely asking for her expert judgment—testing if she can cut through complexity and identify the single highest-leverage change. He listens to her answer with full attention. Nods slowly. Then, a faint, tired smile.",
-    "dialogue": "You know what? You should have been my partner, not just my chef. I think I knew that a year ago and didn't want to admit it. Control, ego, whatever—I kept the big decisions to myself. And maybe that's why we're here. The investor meeting is Thursday. If you want in, let me know by Wednesday. If you don't... I'll understand. Either way, Mira—thank you. For tonight. For all of it. Lock up when you're done?"
+    "dialogue": "You know what? You should have been my partner, not just my chef. Control, ego, whatever—I kept the big decisions to myself. And maybe that's why we're here. The investor meeting is Thursday. If you want in, let me know by Wednesday. If you don't... I'll understand. Either way, Mira—thank you. For tonight. For all of it. Lock up when you're done?"
   },
   {
     "round": 10,
