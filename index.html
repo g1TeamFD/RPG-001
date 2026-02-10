@@ -214,6 +214,46 @@
         position: relative;
       }
 
+      .pause-control {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 10px 0;
+        background: rgba(255, 255, 255, 0.25);
+        border-bottom: 1px solid rgba(44, 62, 60, 0.1);
+        flex-shrink: 0;
+      }
+
+      .pause-play-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        background: #2c3e3c;
+        color: #f5f1e8;
+        border: none;
+        border-radius: 999px;
+        padding: 8px 18px;
+        font-size: 13px;
+        font-weight: 700;
+        cursor: pointer;
+        transition: transform 0.2s, background 0.2s, opacity 0.2s;
+      }
+
+      .pause-play-btn:hover {
+        background: #e85d4d;
+        transform: translateY(-1px);
+      }
+
+      .pause-play-btn.is-paused {
+        background: #e85d4d;
+      }
+
+      .pause-play-btn:disabled {
+        cursor: not-allowed;
+        opacity: 0.5;
+        transform: none;
+      }
+
       .nav-arrow {
         width: 35px;
         height: 35px;
@@ -988,9 +1028,119 @@
         margin-top: 8px;
         line-height: 1.5;
       }
+      /* Historical View Styles */
+      .historical-view-banner {
+        background: #fff3cd;
+        border: 2px solid #ffc107;
+        border-radius: 8px;
+        padding: 12px 16px;
+        margin-bottom: 12px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        animation: slideDown 0.3s ease;
+      }
 
+      @keyframes slideDown {
+        from {
+          opacity: 0;
+          transform: translateY(-10px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
 
+      #historical-view-notification {
+        font-size: 14px;
+        font-weight: 600;
+        color: #856404;
+        text-align: center;
+      }
 
+      .response-input-area.disabled-overlay {
+        position: relative;
+        opacity: 0.5;
+        pointer-events: none;
+      }
+
+      .response-input-area.disabled-overlay::after {
+        content: "Viewing Past Scene - Read Only";
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background: rgba(0, 0, 0, 0.7);
+        color: white;
+        padding: 10px 15px;
+        border-radius: 6px;
+        font-size: 12px;
+        font-weight: 600;
+        white-space: nowrap;
+        z-index: 10;
+      }
+
+      .response-input-area.manual-paused {
+        position: relative;
+        opacity: 0.6;
+        pointer-events: none;
+      }
+
+      .response-input-area.manual-paused::after {
+        content: "Game Paused - Click Play to Resume";
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background: rgba(44, 62, 60, 0.85);
+        color: #f5f1e8;
+        padding: 10px 16px;
+        border-radius: 999px;
+        font-size: 12px;
+        font-weight: 700;
+        white-space: nowrap;
+        z-index: 10;
+      }
+
+      .manual-pause-banner {
+        background: #e8f5f3;
+        border: 2px solid #4dd8c6;
+        border-radius: 8px;
+        padding: 12px 16px;
+        margin-bottom: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+        animation: slideDown 0.3s ease;
+      }
+
+      .manual-pause-banner-text {
+        font-size: 14px;
+        font-weight: 600;
+        color: #2c3e3c;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .manual-pause-banner button {
+        background: #2c3e3c;
+        color: #f5f1e8;
+        border: none;
+        border-radius: 999px;
+        padding: 6px 14px;
+        font-size: 12px;
+        font-weight: 700;
+        cursor: pointer;
+        transition: background 0.2s, transform 0.2s;
+      }
+
+      .manual-pause-banner button:hover {
+        background: #e85d4d;
+        transform: translateY(-1px);
+      }
 
     </style>
   </head>
@@ -1072,7 +1222,30 @@
           <div class="nav-arrow" onclick="navigateNextScene()">›</div>
         </div>
 
-        <div class="conversation-scroll-area" id="conversation-history"></div>
+        <div class="pause-control">
+          <button
+            id="pause-play-btn"
+            class="pause-play-btn"
+            onclick="toggleManualPause()"
+          >
+            ⏸ Pause
+          </button>
+        </div>
+
+        <div class="conversation-scroll-area" id="conversation-history">
+              <!-- Historical View Notification Banner -->
+          <div id="historical-view-banner" class="historical-view-banner hidden">
+            <span>📖</span>
+            <span id="historical-view-notification">Viewing Past Scene - Read Only</span>
+          </div>
+          <div id="manual-pause-banner" class="manual-pause-banner hidden">
+            <div class="manual-pause-banner-text">
+              <span>⏸️</span>
+              <span>Game Paused</span>
+            </div>
+            <button type="button" onclick="toggleManualPause()">Play</button>
+          </div>
+        </div>
 
         <div
           class="response-input-area"

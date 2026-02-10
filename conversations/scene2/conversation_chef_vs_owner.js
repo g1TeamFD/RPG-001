@@ -43,7 +43,7 @@ window.SCENE_DATA[2] = {
     uid: 'R3-K1',
     speaker: 'Kenji',
     role: 'The Restaurant Owner',
-    narrative: 'Sarah pulls out a tablet, showing delivery platform data—numbers, graphs, customer density heat maps. She said: "Here is what I am proposing: A one-month pilot. I fund the ghost kitchen setup—industrial space, equipment rental, platform fees. You two run operations. If you hit $45,000 in revenue with 15% margins, I invest $200K for a proper launch. If not, we part ways. But here is the catch—you have to decide tonight if you are in."',
+    narrative: 'Sarah pulls out a tablet, showing delivery platform data—numbers, graphs, customer density heat maps. She said: "Here is what I am proposing: A three-month pilot. I fund the ghost kitchen setup—industrial space, equipment rental, platform fees. You two run operations. If you hit $45,000 in revenue with 15% margins, I invest $200K for a proper launch. If not, we part ways. But here is the catch—you have to decide tonight if you are in."',
     dialogue: 'Sarah, if we do this... what happens to the Ember & Spoon brand? The space? The memories?'
   },
   {
@@ -70,7 +70,7 @@ window.SCENE_DATA[2] = {
     uid: 'R5-K1',
     speaker: 'Kenji',
     role: 'The Restaurant Owner',
-    narrative: 'Sarah nods, appreciating the honesty. She opens a contract on her tablet and said: "Fair. Here is what the one-month trial looks like: You will operate out of a shared commercial kitchen in Kallang. Menu limited to your top 12 dishes—nothing fancy, just what travels well. Target: 150 orders per day average. I need both of you on this. Kenji handles platform partnerships, pricing, marketing. Mira, you run the kitchen and manage the cooks. Questions?"',
+    narrative: 'Sarah nods, appreciating the honesty. She opens a contract on her tablet and said: "Fair. Here is what the three-month trial looks like: You will operate out of a shared commercial kitchen in Kallang. Menu limited to your top 12 dishes—nothing fancy, just what travels well. Target: 150 orders per day average. I need both of you on this. Kenji handles platform partnerships, pricing, marketing. Mira, you run the kitchen and manage the cooks. Questions?"',
     dialogue: 'Mira... I cannot do this without you. Not just because you are a great chef, but because you see things I miss. If you are in, I am in. If you are not... I will understand.'
   },
   {

@@ -36,7 +36,7 @@ window.SCENE_DATA[6] = {
       speaker: 'Mira',
       role: 'The Chef',
       is_player: true,
-      narrative: 'You pass a struggling café. The owner is outside, stacking chairs. A "For Lease" sign leans against the window. (Click <a href="https://projectinfinity8.substack.com/p/s1c90-tell-me-why-wala-wala-cafe?utm_source=publication-search" target="_blank" rel="noopener">here</a> to know more about the cafe). Two doors down, a new bubble tea shop has a line of young workers — early twenties, phones out, waiting. Kenji stops.',
+      narrative: 'You pass a struggling café. The owner is outside, stacking chairs. A "For Lease" sign leans against the window. (Click <a href="https://projectinfinity8.substack.com/p/s1c90-tell-me-why-wala-wala-cafe" target="_blank" rel="noopener">here</a> to know more about the cafe). Two doors down, a new bubble tea shop has a line of young workers — early twenties, phones out, waiting. Kenji stops.',
       dialogue: 'That café closed because [B2-1], but that bubble tea shop is thriving because [B2-2].',
       blanks: ['B2-1', 'B2-2']
     },
