@@ -62,6 +62,14 @@ let manualPauseState = {
 // True only when the current turn is actively awaiting player input.
 let isResponseInputActive = false;
 
+// Guard async render callbacks so stale timeouts from pre-navigation state
+// cannot append out-of-order/duplicate dialogue blocks.
+let conversationRenderToken = 0;
+
+function bumpConversationRenderToken() {
+  conversationRenderToken += 1;
+  return conversationRenderToken;
+}
 
 window.actualCurrentScene = actualCurrentScene;
 window.isViewingHistoricalScene = isViewingHistoricalScene;
@@ -197,6 +205,8 @@ async function startGame() {
   sessionData.playerRole = playerRole;
   sessionData.computerRole = computerRole;
   sessionData.startDateTime = getSingaporeDateTime();
+  sessionData.responses = [];
+  sessionData.finalScores = {};
 
   // === GAME SESSION INIT (Non-breaking, CORRECT PLACE) ===
   const gameSession = {
@@ -214,6 +224,7 @@ async function startGame() {
     totalScore: 0,
     sceneHistory: [],
     playerDecisions: {},
+    responses: [],
     // === NEW: INITIALIZE CONVERSATION STATE ===
     actualCurrentScene: 1,
     isViewingHistoricalScene: false,
@@ -256,6 +267,8 @@ async function startGame() {
     }
     gameSession.sceneMetaHistory[1] = window.SCENE_META;
     sessionStorage.setItem("gameSession", JSON.stringify(gameSession));
+
+    ensureSceneRenderState(1);
 
   // Add Scene 1 to sceneHistory to track the starting scene in navigation
   gameSession.sceneHistory.push(1);
@@ -359,21 +372,243 @@ function ensureNavigationPauseState() {
   }
 }
 
+
+function ensureSceneRenderState(sceneID) {
+  const gameSession = JSON.parse(sessionStorage.getItem('gameSession') || '{}');
+  if (!gameSession.sceneRenderState) gameSession.sceneRenderState = {};
+  if (!gameSession.sceneRenderState[sceneID]) {
+    gameSession.sceneRenderState[sceneID] = {
+      completedTurnUIDs: [],
+      draftInputs: {}
+    };
+  }
+  sessionStorage.setItem('gameSession', JSON.stringify(gameSession));
+  return gameSession.sceneRenderState[sceneID];
+}
+
+function markTurnCompleted(sceneID, turnUID) {
+  if (!turnUID) return;
+  const gameSession = JSON.parse(sessionStorage.getItem('gameSession') || '{}');
+  if (!gameSession.sceneRenderState) gameSession.sceneRenderState = {};
+  if (!gameSession.sceneRenderState[sceneID]) {
+    gameSession.sceneRenderState[sceneID] = { completedTurnUIDs: [], draftInputs: {} };
+  }
+
+  const list = gameSession.sceneRenderState[sceneID].completedTurnUIDs;
+  if (!list.includes(turnUID)) {
+    list.push(turnUID);
+  }
+
+  sessionStorage.setItem('gameSession', JSON.stringify(gameSession));
+}
+
+function saveDraftInputsForScene(sceneID) {
+  const gameSession = JSON.parse(sessionStorage.getItem('gameSession') || '{}');
+  if (!gameSession.sceneRenderState) gameSession.sceneRenderState = {};
+  if (!gameSession.sceneRenderState[sceneID]) {
+    gameSession.sceneRenderState[sceneID] = { completedTurnUIDs: [], draftInputs: {} };
+  }
+
+  const draftInputs = {};
+  document.querySelectorAll('#current-player-input .blank-input').forEach((input) => {
+    draftInputs[input.id] = input.value || '';
+  });
+
+  gameSession.sceneRenderState[sceneID].draftInputs = draftInputs;
+  sessionStorage.setItem('gameSession', JSON.stringify(gameSession));
+  return draftInputs;
+}
+
+function findTurnByUID(turnUID) {
+  if (!turnUID) return null;
+  return CONVERSATION_DATA.find((turn) => turn.uid === turnUID) || null;
+}
+
+function getResponseEntryForRound(round, sceneID = null) {
+  const targetSceneID = sceneID ?? JSON.parse(sessionStorage.getItem('gameSession') || '{}')?.currentScene;
+  for (let i = sessionData.responses.length - 1; i >= 0; i -= 1) {
+    const entry = sessionData.responses[i];
+    if (entry.round !== round) continue;
+    if (targetSceneID == null) return entry;
+    if (entry.sceneID === targetSceneID) return entry;
+  }
+
+  // backward compatibility for legacy entries stored before sceneID existed
+  return sessionData.responses.find((entry) => entry.round === round && entry.sceneID === undefined) || null;
+}
+
+function buildPlayerDialogueHTMLFromSavedResponses(turnData) {
+  if (!turnData?.dialogue) return '';
+
+  let dialogueHTML = turnData.dialogue;
+  if (!Array.isArray(turnData.blanks) || turnData.blanks.length === 0) {
+    return dialogueHTML;
+  }
+
+  const currentSceneID = JSON.parse(sessionStorage.getItem('gameSession') || '{}')?.currentScene;
+  const entry = getResponseEntryForRound(turnData.round, currentSceneID);
+  const values = entry?.blanks || {};
+
+  turnData.blanks.forEach((blankUID) => {
+    const value = (values[blankUID] || '').trim() || '...';
+    dialogueHTML = dialogueHTML.replace(
+      `[${blankUID}]`,
+      `<span class="editable-blank" data-uid="${blankUID}" data-round="${turnData.round}">[<strong>${value}</strong>]<span class="edit-icon" onclick="editBlank('${blankUID}', ${turnData.round})">✏️</span></span>`
+    );
+  });
+
+  return dialogueHTML;
+}
+
+function appendStaticTurnToHistory(turnData) {
+  if (!turnData) return;
+  const conversationHistory = document.getElementById('conversation-history');
+  if (!conversationHistory) return;
+
+  if (turnData.narrative && turnData.narrative.trim()) {
+    const narrativeEl = document.createElement('div');
+    narrativeEl.className = 'narrative-box';
+    narrativeEl.textContent = turnData.narrative;
+    conversationHistory.appendChild(narrativeEl);
+  }
+
+  if (turnData.resource || turnData.resource_guideline) {
+    const resourceBlock = createResourceBlock(turnData);
+    if (resourceBlock) conversationHistory.appendChild(resourceBlock);
+  }
+
+  const isPlayer = isPlayerTurn(turnData);
+  const turnClass = isPlayer ? 'dialogue-turn mira' : 'dialogue-turn kenji';
+  const avatar = isPlayer ? '👨‍🍳' : '👨‍💼';
+  const avatarStyle = isPlayer ? ' style="background:#E85D4D;"' : '';
+  const dialogueText = isPlayer
+    ? buildPlayerDialogueHTMLFromSavedResponses(turnData)
+    : (turnData.dialogue || '');
+
+  const dialogueEl = document.createElement('div');
+  dialogueEl.className = turnClass;
+  dialogueEl.innerHTML = `
+    <div class="speaker-info">
+      <div class="speaker-avatar"${avatarStyle}>${avatar}</div>
+      <div>
+        <div class="speaker-name">${turnData.speaker}</div>
+        <div class="speaker-role">${turnData.role}</div>
+      </div>
+    </div>
+    <div class="dialogue-bubble"><div class="dialogue-text">${dialogueText}</div></div>
+  `;
+  conversationHistory.appendChild(dialogueEl);
+}
+
+function rebuildConversationFromState(sceneID) {
+  const gameSession = JSON.parse(sessionStorage.getItem('gameSession') || '{}');
+  const conversationHistory = document.getElementById('conversation-history');
+  if (!conversationHistory) return;
+
+  conversationHistory.innerHTML = '';
+  const completed = gameSession?.sceneRenderState?.[sceneID]?.completedTurnUIDs || [];
+  completed.forEach((uid) => {
+    const turnData = findTurnByUID(uid);
+    appendStaticTurnToHistory(turnData);
+  });
+
+  scrollToBottom();
+}
+
+function restoreDraftInputsForCurrentTurn(sceneID) {
+  const gameSession = JSON.parse(sessionStorage.getItem('gameSession') || '{}');
+  const drafts = gameSession?.sceneRenderState?.[sceneID]?.draftInputs || {};
+  Object.entries(drafts).forEach(([blankUID, value]) => {
+    const input = document.getElementById(blankUID);
+    if (input) input.value = value;
+  });
+}
+
+function rebuildConversationToPosition(sceneID, targetRound, targetStep) {
+  const conversationHistory = document.getElementById('conversation-history');
+  if (!conversationHistory || !Array.isArray(CONVERSATION_DATA)) return;
+
+  conversationHistory.innerHTML = '';
+
+  const rounds = [...new Set(CONVERSATION_DATA.map((turn) => turn.round))].sort((a, b) => a - b);
+  rounds.forEach((roundNumber) => {
+    const roundTurns = CONVERSATION_DATA.filter((turn) => turn.round === roundNumber);
+    if (roundNumber < targetRound) {
+      roundTurns.forEach((turn) => appendStaticTurnToHistory(turn));
+      return;
+    }
+
+    if (roundNumber === targetRound) {
+      for (let i = 0; i < Math.min(targetStep, roundTurns.length); i += 1) {
+        appendStaticTurnToHistory(roundTurns[i]);
+      }
+    }
+  });
+
+  scrollToBottom();
+}
+
+function appendPendingPlayerTurnContext(turnData) {
+  if (!turnData) return;
+
+  const conversationHistory = document.getElementById('conversation-history');
+  if (!conversationHistory) return;
+
+  if (turnData.narrative && turnData.narrative.trim()) {
+    const narrativeEl = document.createElement('div');
+    narrativeEl.className = 'narrative-box';
+    narrativeEl.textContent = turnData.narrative;
+    conversationHistory.appendChild(narrativeEl);
+  }
+
+  if (turnData.resource || turnData.resource_guideline) {
+    const resourceBlock = createResourceBlock(turnData);
+    if (resourceBlock) conversationHistory.appendChild(resourceBlock);
+  }
+
+  scrollToBottom();
+}
+
 function displayCurrentTurn() {
   // Validate CONVERSATION_DATA exists
   if (!CONVERSATION_DATA) {
     console.error('CONVERSATION_DATA is undefined. Scene may not have loaded properly.');
     return;
   }
-  
+
+  const renderToken = conversationRenderToken;
+
   // Get all turns for the current round, then use currentStep as an index
   const roundTurns = CONVERSATION_DATA.filter(d => d.round === currentRound);
   const turnData = roundTurns[currentStep];
 
   if (!turnData) return;
 
-
   const conversationHistory = document.getElementById('conversation-history');
+
+  const continueToDialogue = () => {
+    if (renderToken !== conversationRenderToken) return;
+    isPlayerTurn(turnData)
+      ? displayPlayerResponse(turnData)
+      : displayComputerDialogue(turnData, renderToken);
+  };
+
+  const appendResourceThenContinue = () => {
+    if (renderToken !== conversationRenderToken) return;
+    if (turnData.resource || turnData.resource_guideline) {
+      const resourceBlock = createResourceBlock(turnData);
+      if (resourceBlock) {
+        conversationHistory.appendChild(resourceBlock);
+        scrollToBottom();
+      }
+      setTimeout(() => {
+        if (renderToken !== conversationRenderToken) return;
+        continueToDialogue();
+      }, 400);
+      return;
+    }
+    continueToDialogue();
+  };
 
   if (turnData.narrative && turnData.narrative.trim()) {
     const narrativeEl = document.createElement('div');
@@ -381,41 +616,20 @@ function displayCurrentTurn() {
     conversationHistory.appendChild(narrativeEl);
     typeText(narrativeEl, turnData.narrative, 15);
 
-    // Calculate base delay for narrative completion
     const narrativeDelay = turnData.narrative.length * 15 + 500;
-
-    // Check if resource block should appear after narrative (before dialogue)
-    if (turnData.resource || turnData.resource_guideline) {
-      setTimeout(() => {
-        const resourceBlock = createResourceBlock(turnData);
-        if (resourceBlock) {
-          conversationHistory.appendChild(resourceBlock);
-          scrollToBottom();
-        }
-        // Schedule dialogue/player response after resource block appears
-        setTimeout(() => {
-          isPlayerTurn(turnData)
-            ? displayPlayerResponse(turnData)
-            : displayComputerDialogue(turnData);
-        }, 1000);
-      }, narrativeDelay);
-    } else {
-      // No resource block, proceed directly to dialogue/response
-      setTimeout(() => {
-          isPlayerTurn(turnData)
-            ? displayPlayerResponse(turnData)
-            : displayComputerDialogue(turnData);
-      }, narrativeDelay);
-    }
-
-  } else {
-          isPlayerTurn(turnData)
-            ? displayPlayerResponse(turnData)
-            : displayComputerDialogue(turnData);
+    setTimeout(() => {
+      if (renderToken !== conversationRenderToken) return;
+      appendResourceThenContinue();
+    }, narrativeDelay);
+    return;
   }
+
+  appendResourceThenContinue();
 }
 
-function displayComputerDialogue(turnData) {
+function displayComputerDialogue(turnData, renderToken = conversationRenderToken) {
+  if (renderToken !== conversationRenderToken) return;
+
   const conversationHistory = document.getElementById('conversation-history');
 
   const dialogueEl = document.createElement('div');
@@ -444,27 +658,13 @@ function displayComputerDialogue(turnData) {
   // Calculate base delay for dialogue completion
   const dialogueDelay = turnData.dialogue.length * 20 + 3000;
 
-  // Check if resource block should appear after dialogue (before next turn)
-  if (turnData.resource || turnData.resource_guideline) {
-    setTimeout(() => {
-      const resourceBlock = createResourceBlock(turnData);
-      if (resourceBlock) {
-        conversationHistory.appendChild(resourceBlock);
-        scrollToBottom();
-      }
-      // Schedule next turn after resource block appears
-      setTimeout(() => {
-        currentStep = 1;
-        displayCurrentTurn();
-      }, 1000);
-    }, dialogueDelay);
-  } else {
-    // No resource block, proceed directly to next turn
-    setTimeout(() => {
-      currentStep = 1;
-      displayCurrentTurn();
-    }, dialogueDelay);
-  }
+  setTimeout(() => {
+    if (renderToken !== conversationRenderToken) return;
+    const gs = JSON.parse(sessionStorage.getItem("gameSession") || '{}');
+    markTurnCompleted(gs.currentScene, turnData.uid);
+    currentStep = 1;
+    displayCurrentTurn();
+  }, dialogueDelay);
   
   // Ensure timer is managed correctly after computer dialogue
   manageTimerForSceneState();
@@ -596,6 +796,7 @@ function submitResponse() {
 
   const responses = {};
   const responseDetails = {
+    sceneID: gameSession?.currentScene || actualCurrentScene,
     round: currentRound,
     timestamp: getSingaporeDateTime(),
     blanks: {},
@@ -645,14 +846,7 @@ function submitResponse() {
   isResponseInputActive = false;
   scrollToBottom();
 
-  // Check if resource block should appear after player's response
-  if (currentData.resource || currentData.resource_guideline) {
-    const resourceBlock = createResourceBlock(currentData);
-    if (resourceBlock) {
-      conversationHistory.appendChild(resourceBlock);
-      scrollToBottom();
-    }
-  }
+  markTurnCompleted(gameSession?.currentScene || 1, currentData.uid);
 
   sessionData.responses.push(responseDetails);
 
@@ -791,7 +985,8 @@ function saveBlank(blankUID, round) {
   const input = document.getElementById(`edit-${blankUID}-${round}`);
   const newValue = input.value.trim() !== '' ? input.value.trim() : '...';
 
-  const entry = sessionData.responses.find((r) => r.round === round);
+  const currentSceneID = JSON.parse(sessionStorage.getItem('gameSession') || '{}')?.currentScene;
+  const entry = getResponseEntryForRound(round, currentSceneID);
   if (entry) entry.blanks[blankUID] = newValue;
 
   const span = document.querySelector(
@@ -1329,6 +1524,7 @@ function loadSceneConversation(sceneID) {
   const conversationHistory = document.getElementById('conversation-history');
   
   if (gameSession.conversationHistory && Object.prototype.hasOwnProperty.call(gameSession.conversationHistory, sceneID)) {
+    ensureSceneRenderState(sceneID);
     conversationHistory.innerHTML = gameSession.conversationHistory[sceneID] || '';
     
     // AFTER LOADING CONVERSATION, CHECK IF DECISION CHECKPOINT BARRIER SHOULD BE SHOWN
@@ -1394,6 +1590,7 @@ function navigatePreviousScene() {
 
   // STEP 2: SAVE CURRENT SCENE CONVERSATION
   saveCurrentSceneConversation();
+  bumpConversationRenderToken();
 
   // STEP 3: LOAD PREVIOUS SCENE CONVERSATION
   const loaded = loadSceneConversation(previousScene);
@@ -1500,6 +1697,7 @@ function navigateNextScene() {
 
   // STEP 2: SAVE CURRENT SCENE CONVERSATION
   saveCurrentSceneConversation();
+  bumpConversationRenderToken();
 
   // STEP 3: LOAD NEXT SCENE CONVERSATION
   const loaded = loadSceneConversation(nextScene);
@@ -1534,7 +1732,21 @@ function navigateNextScene() {
 
     sessionStorage.setItem("gameSession", JSON.stringify(gameSession));
     syncSessionStateToGlobal();
-    updateResponseInputAreaVisibility();
+
+    rebuildConversationToPosition(nextScene, currentRound, currentStep);
+
+    const activeTurn = getTurnAtState(currentRound, currentStep);
+    if (activeTurn && isPlayerTurn(activeTurn)) {
+      appendPendingPlayerTurnContext(activeTurn);
+      displayPlayerResponse(activeTurn);
+      restoreDraftInputsForCurrentTurn(nextScene);
+      updateResponseInputAreaVisibility();
+    } else {
+      const inputRoot = document.getElementById('current-player-input');
+      if (inputRoot) inputRoot.innerHTML = '';
+      updateResponseInputAreaVisibility();
+    }
+
     applyManualPauseUI();
   } else {
     console.log('Navigating to another historical scene');
@@ -1599,18 +1811,22 @@ function updatePausePlayButtonState() {
 
 function applyManualPauseUI() {
   const inputArea = document.getElementById('response-input-area');
-  const banner = document.getElementById('manual-pause-banner');
+  const gameSession = JSON.parse(sessionStorage.getItem("gameSession") || '{}');
   const isPaused = manualPauseState?.isPaused;
+  const shouldShowPauseOverlay = Boolean(
+    isPaused &&
+    gameSession?.currentScene === actualCurrentScene &&
+    !isViewingHistoricalScene
+  );
 
   if (inputArea) {
     inputArea.classList.toggle('manual-paused', Boolean(isPaused));
-  }
 
-  if (banner) {
-    if (isPaused && !isViewingHistoricalScene) {
-      banner.classList.remove('hidden');
-    } else {
-      banner.classList.add('hidden');
+    if (shouldShowPauseOverlay) {
+      inputArea.style.display = 'block';
+      inputArea.classList.add('disabled-overlay');
+    } else if (!isResponseInputActive) {
+      inputArea.classList.remove('disabled-overlay');
     }
   }
 
@@ -1714,6 +1930,13 @@ function pauseActiveConversation() {
   // 4) PRESERVE CURRENT PLAYER INPUT CONTENT
   // Keep any in-progress typed draft when navigating away so returning + Play can resume
   // the same waiting-for-player state instead of silently auto-submitting empty blanks.
+  const currentSession = JSON.parse(sessionStorage.getItem("gameSession") || '{}');
+  if (currentSession?.currentScene !== undefined) {
+    const draftInputs = saveDraftInputsForScene(currentSession.currentScene);
+    if (pausedConversationState) {
+      pausedConversationState.draftInputs = draftInputs;
+    }
+  }
 
   // 5) KEEP TURN OWNERSHIP STATE FOR RESUME
   const activeTurn = getTurnAtState(currentRound, currentStep);
@@ -1725,6 +1948,7 @@ function pauseActiveConversation() {
   console.log('✅ Navigation pause converted to manual-style paused state');
 
   // 7) PERSIST PAUSED STATE TO SESSION
+  bumpConversationRenderToken();
   syncGlobalStateToSession();
   
   console.log(`✅ Conversation paused at Round ${currentRound}, Step ${currentStep}`);
@@ -1762,6 +1986,7 @@ function resumeActiveConversation() {
   // Continue pipeline for computer turns; keep player turns waiting for input.
   if (activeTurn && !activePlayerTurn) {
     console.log('⏯ Resuming from computer turn, continuing pipeline');
+    bumpConversationRenderToken();
     displayCurrentTurn();
   } else {
     updateResponseInputAreaVisibility();
@@ -2167,6 +2392,7 @@ function syncGlobalStateToSession() {
     gameSession.isViewingHistoricalScene = isViewingHistoricalScene;
     gameSession.pausedConversationState = pausedConversationState;
     gameSession.manualPauseState = manualPauseState;
+    gameSession.responses = sessionData.responses;
     sessionStorage.setItem("gameSession", JSON.stringify(gameSession));
   }
 }
@@ -2182,6 +2408,10 @@ function syncSessionStateToGlobal() {
       pausedAt: null,
       remainingSeconds: null
     };
+
+    if (Array.isArray(gameSession.responses)) {
+      sessionData.responses = gameSession.responses;
+    }
 
     window.actualCurrentScene = actualCurrentScene;
     window.isViewingHistoricalScene = isViewingHistoricalScene;
