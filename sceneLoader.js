@@ -2,6 +2,28 @@
 // SCENE LOADER (Additive)
 // ============================================
 
+function getSceneDataForActivePair(sceneID) {
+  const pairKey = typeof getActivePairKey === 'function' ? getActivePairKey() : 'chef_vs_owner';
+
+  if (window.SCENE_DATA_BY_PAIR && window.SCENE_DATA_BY_PAIR[pairKey] && window.SCENE_DATA_BY_PAIR[pairKey][sceneID]) {
+    return {
+      pairKey,
+      sceneData: window.SCENE_DATA_BY_PAIR[pairKey][sceneID],
+      sceneMeta: window.SCENE_META_BY_PAIR?.[pairKey]?.[sceneID] || window[`SCENE_META_${sceneID}`]
+    };
+  }
+
+  if (window.SCENE_DATA && window.SCENE_DATA[sceneID]) {
+    return {
+      pairKey: 'chef_vs_owner',
+      sceneData: window.SCENE_DATA[sceneID],
+      sceneMeta: window[`SCENE_META_${sceneID}`]
+    };
+  }
+
+  return null;
+}
+
 async function loadScene(sceneID) {
   const gameSession = JSON.parse(sessionStorage.getItem("gameSession"));
   if (!gameSession) return;
@@ -53,25 +75,26 @@ async function loadScene(sceneID) {
 
 
   // Load scene-specific data into global variables
-  if (window.SCENE_DATA && window.SCENE_DATA[sceneID]) {
-    window.CONVERSATION_DATA = window.SCENE_DATA[sceneID].conversation;
-    window.ANSWER_KEY_DATA = window.SCENE_DATA[sceneID].answerKey;
-    window.SCENE_META = window[`SCENE_META_${sceneID}`];
-
-    // Validate scene data loaded correctly
-    if (!window.SCENE_META) {
-      console.error(`Scene ${sceneID} metadata failed to load. SCENE_META_${sceneID} is undefined.`);
-      return;
-    }
-    if (!window.CONVERSATION_DATA) {
-      console.error(`Scene ${sceneID} conversation data failed to load. SCENE_DATA[${sceneID}] is undefined.`);
-      return;
-    }
-    console.log(`Scene ${sceneID} loaded successfully:`, window.SCENE_META.sceneTitle);
-  } else {
-    console.error(`Scene ${sceneID} data not found in window.SCENE_DATA`);
+  const activeSceneBundle = getSceneDataForActivePair(sceneID);
+  if (!activeSceneBundle) {
+    console.error(`Scene ${sceneID} data not found for active pair`);
     return;
   }
+
+  window.CONVERSATION_DATA = activeSceneBundle.sceneData.conversation;
+  window.ANSWER_KEY_DATA = activeSceneBundle.sceneData.answerKey;
+  window.SCENE_META = activeSceneBundle.sceneMeta;
+
+  // Validate scene data loaded correctly
+  if (!window.SCENE_META) {
+    console.error(`Scene ${sceneID} metadata failed to load for pair ${activeSceneBundle.pairKey}.`);
+    return;
+  }
+  if (!window.CONVERSATION_DATA) {
+    console.error(`Scene ${sceneID} conversation data failed to load for pair ${activeSceneBundle.pairKey}.`);
+    return;
+  }
+  console.log(`Scene ${sceneID} loaded successfully for ${activeSceneBundle.pairKey}:`, window.SCENE_META.sceneTitle);
 
   // Scene 1 is already loaded via script tag at startup
   if (sceneID === 1) {

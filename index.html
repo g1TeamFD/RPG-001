@@ -1241,7 +1241,7 @@
           <div id="manual-pause-banner" class="manual-pause-banner hidden">
             <div class="manual-pause-banner-text">
               <span>⏸️</span>
-              <span>Game Paused</span>
+              <span>Game Paused - Navigate forward to Current Scene and Click Play to Resume</span>
             </div>
             <button type="button" onclick="toggleManualPause()">Play</button>
           </div>
@@ -1353,13 +1353,6 @@
           <label class="form-label">Your Role *</label>
           <select id="player-role" class="form-select">
             <option value="">-- Select your role --</option>
-            <option value="The Chef (Mira)">The Chef (Mira)</option>
-            <option value="The Restaurant Owner (Kenji)">
-              The Restaurant Owner (Kenji)
-            </option>
-            <option value="The Floor Manager (Aiden)">
-              The Floor Manager (Aiden)
-            </option>
           </select>
         </div>
 
@@ -1367,13 +1360,6 @@
           <label class="form-label">Computer's Role *</label>
           <select id="computer-role" class="form-select">
             <option value="">-- Select computer's role --</option>
-            <option value="The Restaurant Owner (Kenji)">
-              The Restaurant Owner (Kenji)
-            </option>
-            <option value="The Chef (Mira)">The Chef (Mira)</option>
-            <option value="The Floor Manager (Aiden)">
-              The Floor Manager (Aiden)
-            </option>
           </select>
         </div>
 
@@ -1415,20 +1401,11 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="conversations/scene1/conversation_chef_vs_owner.js"></script>
-    <script src="conversations/scene1/answer_key_chef_vs_owner.js"></script>
-    <script src="conversations/scene2/conversation_chef_vs_owner.js"></script>
-    <script src="conversations/scene2/answer_key_chef_vs_owner.js"></script>
-    <script src="conversations/scene3/conversation_chef_vs_owner.js"></script>
-    <script src="conversations/scene3/answer_key_chef_vs_owner.js"></script>
-    <script src="conversations/scene4/conversation_chef_vs_owner.js"></script>
-    <script src="conversations/scene4/answer_key_chef_vs_owner.js"></script>
-    <script src="conversations/scene5/conversation_chef_vs_owner.js"></script>
-    <script src="conversations/scene5/answer_key_chef_vs_owner.js"></script>
-    <script src="conversations/scene6/conversation_chef_vs_owner.js"></script>
-    <script src="conversations/scene6/answer_key_chef_vs_owner.js"></script>
     <script src="view-story.js"></script>
     <script src="view-roles.js"></script>
+    <script src="pair-config.js"></script>
+    <script src="pair-manifest.js"></script>
+    <script src="pair-runtime.js"></script>
     <script src="game-ui.js"></script>
     <script src="scene-decisions.js"></script>
     <script src="game-logic.js"></script>

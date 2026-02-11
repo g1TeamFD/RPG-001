@@ -6,6 +6,7 @@
 if (!window.SCENE_DATA) window.SCENE_DATA = {};
 if (!window.SCENE_DATA[5]) window.SCENE_DATA[5] = {};
 window.SCENE_DATA[5].answerKey = [
+
   
   // =====================================================
   // B1-1 – "inventory strategy needs to be [B1-1]"
@@ -423,3 +424,7 @@ window.SCENE_DATA[5].answerKey = [
     }
   }
 ];
+
+if (!window.SCENE_DATA_BY_PAIR) window.SCENE_DATA_BY_PAIR = {};
+if (!window.SCENE_DATA_BY_PAIR.chef_vs_owner) window.SCENE_DATA_BY_PAIR.chef_vs_owner = {};
+if (!window.SCENE_DATA_BY_PAIR.chef_vs_owner[5]) window.SCENE_DATA_BY_PAIR.chef_vs_owner[5] = window.SCENE_DATA[5];

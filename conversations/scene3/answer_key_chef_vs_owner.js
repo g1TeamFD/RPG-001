@@ -7,6 +7,7 @@ if (!window.SCENE_DATA) window.SCENE_DATA = {};
 if (!window.SCENE_DATA[3]) window.SCENE_DATA[3] = {};
 window.SCENE_DATA[3].answerKey = [
 
+
   
   // =====================================================
   // B1-1 – "I feel [B1-1]"
@@ -911,3 +912,7 @@ window.SCENE_DATA[3].answerKey = [
     }
   }
 ];
+
+if (!window.SCENE_DATA_BY_PAIR) window.SCENE_DATA_BY_PAIR = {};
+if (!window.SCENE_DATA_BY_PAIR.chef_vs_owner) window.SCENE_DATA_BY_PAIR.chef_vs_owner = {};
+if (!window.SCENE_DATA_BY_PAIR.chef_vs_owner[3]) window.SCENE_DATA_BY_PAIR.chef_vs_owner[3] = window.SCENE_DATA[3];

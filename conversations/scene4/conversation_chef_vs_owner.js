@@ -11,6 +11,7 @@ if (!window.SCENE_DATA) window.SCENE_DATA = {};
 window.SCENE_DATA[4] = {
   conversation: [
 
+
     {
       round: 1,
       uid: 'R1-K1',
@@ -138,3 +139,9 @@ window.SCENE_DATA[4] = {
 ]   // Close the conversation array
 };
 
+if (!window.SCENE_DATA_BY_PAIR) window.SCENE_DATA_BY_PAIR = {};
+if (!window.SCENE_DATA_BY_PAIR.chef_vs_owner) window.SCENE_DATA_BY_PAIR.chef_vs_owner = {};
+window.SCENE_DATA_BY_PAIR.chef_vs_owner[4] = window.SCENE_DATA[4] || {};
+if (!window.SCENE_META_BY_PAIR) window.SCENE_META_BY_PAIR = {};
+if (!window.SCENE_META_BY_PAIR.chef_vs_owner) window.SCENE_META_BY_PAIR.chef_vs_owner = {};
+window.SCENE_META_BY_PAIR.chef_vs_owner[4] = window.SCENE_META_4;

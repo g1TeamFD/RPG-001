@@ -6,6 +6,7 @@
 if (!window.SCENE_DATA) window.SCENE_DATA = {};
 if (!window.SCENE_DATA[6]) window.SCENE_DATA[6] = {};
 window.SCENE_DATA[6].answerKey = [
+
   
 
   
@@ -857,3 +858,7 @@ window.SCENE_DATA[6].answerKey = [
     }
   }
 ];
+
+if (!window.SCENE_DATA_BY_PAIR) window.SCENE_DATA_BY_PAIR = {};
+if (!window.SCENE_DATA_BY_PAIR.chef_vs_owner) window.SCENE_DATA_BY_PAIR.chef_vs_owner = {};
+if (!window.SCENE_DATA_BY_PAIR.chef_vs_owner[6]) window.SCENE_DATA_BY_PAIR.chef_vs_owner[6] = window.SCENE_DATA[6];
